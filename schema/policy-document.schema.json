@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claims-resolution-recovery-hub/schema/policy-document.schema.json",
+  "title": "PolicyDocument",
+  "type": "object",
+  "required": ["name", "documentType", "version", "active"],
+  "properties": {
+    "name": { "type": "string" },
+    "jurisdiction": { "type": "string" },
+    "version": { "type": "string" },
+    "documentType": { "type": "string", "enum": ["complaint_guide", "carrier_claim_rules", "supplier_agreement", "other"] },
+    "active": { "type": "boolean" },
+    "sourceFile": { "type": "string", "description": "Path to the excerpt file, e.g. demo-data/policy-documents/..." }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "language": "sk",
+  "templates": {
+    "evidence_request_damage": "Ďakujeme za nahlásenie poškodenia a za zaslané fotografie. Aby sme mohli prípad rýchlo vybaviť, prosíme vás ešte o fotografiu vonkajšieho obalu (kartónovej škatule), v akom balík dorazil. Stačí jedna fotografia stavu krabice.",
+    "resolution_replacement": "Je nám ľúto, že vám tovar dorazil poškodený. Náhradný kus vám pošleme hneď po overení zvyšných podkladov.",
+    "resolution_wrong_item": "Ospravedlňujeme sa za zámenu. Správny tovar vám posielame ešte dnes a e-mailom sme vám zaslali predplatenú návratkovú etiketu na nesprávny kus.",
+    "resolution_refund": "Ospravedlňujeme sa za spôsobené nepríjemnosti. Suma bola vrátená na váš pôvodný platobný spôsob.",
+    "acknowledgement": "Ďakujeme za vašu správu. Vašu reklamáciu sme prijali a práve ju posudzujeme."
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claims-resolution-recovery-hub/schema/customer-case.schema.json",
+  "title": "CustomerCase",
+  "type": "object",
+  "required": ["id", "source", "language", "customer", "status", "caseType"],
+  "properties": {
+    "id": { "type": "string" },
+    "source": { "type": "string", "enum": ["email", "form", "manual"] },
+    "language": { "type": "string", "description": "BCP-47 language tag, e.g. en, sk, de" },
+    "customer": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "orderReference": { "type": "string" },
+    "complaintText": { "type": "string" },
+    "salesChannel": { "type": "string" },
+    "desiredOutcome": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["new", "awaiting_evidence", "awaiting_approval", "approved", "rejected", "escalated", "closed"]
+    },
+    "caseType": {
+      "type": "string",
+      "enum": ["withdrawal", "damaged_delivery", "defective_product", "wrong_item", "missing_item", "other"]
+    },
+    "classificationConfidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "attachmentIds": { "type": "array", "items": { "type": "string" } },
+    "resolutionProposalId": { "type": "string" },
+    "recoveryDraftId": { "type": "string" }
+  }
+}

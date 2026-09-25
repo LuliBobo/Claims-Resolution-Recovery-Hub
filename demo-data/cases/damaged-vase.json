@@ -1,0 +1,96 @@
+{
+  "case": {
+    "id": "case-001",
+    "source": "email",
+    "language": "sk",
+    "customer": { "name": "Zuzana Kovalčíková", "email": "zuzana.k@example.com" },
+    "orderReference": "ORD-48213",
+    "complaintText": "Dobrý deň, sklenená váza, ktorú som si objednala, prišla rozbitá. Posielam fotky.",
+    "salesChannel": "webshop",
+    "desiredOutcome": "replacement",
+    "status": "awaiting_evidence",
+    "caseType": "damaged_delivery",
+    "classificationConfidence": 0.93,
+    "createdAt": "2026-09-10T08:15:00Z",
+    "updatedAt": "2026-09-10T08:20:00Z",
+    "attachmentIds": ["att-001"],
+    "resolutionProposalId": "res-001",
+    "recoveryDraftId": "rec-001"
+  },
+  "order": {
+    "orderId": "ORD-48213",
+    "date": "2026-09-05",
+    "sku": "VASE-GLASS-30CM",
+    "quantity": 1,
+    "salesChannel": "webshop",
+    "paymentStatus": "paid",
+    "supplierId": "SUP-GLASSCO",
+    "shipmentId": "SHP-77219"
+  },
+  "shipment": {
+    "carrier": "NordicShip",
+    "trackingId": "NS7742190SK",
+    "deliveryDate": "2026-09-08",
+    "route": "Bratislava depot -> local delivery",
+    "warehouse": "WH-BA-01"
+  },
+  "attachments": [
+    {
+      "id": "att-001",
+      "caseId": "case-001",
+      "fileType": "image",
+      "imageCategory": "product_photo",
+      "confidence": 0.97,
+      "extractedNotes": "Vase visibly shattered, image shows broken glass inside partial packaging.",
+      "fileName": "vase-broken-1.jpg",
+      "uploadedAt": "2026-09-10T08:16:00Z"
+    }
+  ],
+  "evidenceCheck": {
+    "required": ["product_photo", "outer_packaging_photo"],
+    "present": ["product_photo"],
+    "missing": ["outer_packaging_photo"],
+    "generatedCustomerRequest": {
+      "language": "sk",
+      "text": "Ďakujeme za nahlásenie a fotografiu poškodenej vázy. Aby sme mohli prípad rýchlo vybaviť, prosíme vás ešte o fotografiu vonkajšieho obalu (kartónovej škatule), v akom balík dorazil. Stačí jedna fotografia, ktorá ukazuje stav krabice."
+    }
+  },
+  "resolutionProposal": {
+    "id": "res-001",
+    "caseId": "case-001",
+    "recommendation": "replacement",
+    "rationale": "Fragile-goods category with confirmed damage photo; policy allows immediate replacement pending stock once evidence is complete (Complaint Guide 3.2). Outer-packaging photo still missing.",
+    "confidence": 0.8,
+    "valueImpact": -34.9,
+    "factorScores": {
+      "evidenceCompleteness": 2,
+      "policyClarity": 0,
+      "customerImpact": 1,
+      "businessExposure": 1,
+      "recoveryPotential": 2
+    },
+    "workflowPath": "evidence_or_supervisor_check",
+    "policySource": {
+      "documentName": "Merchant Complaint Guide",
+      "excerpt": "3.2 For fragile-goods categories (glass, ceramics), a confirmed shipping-damage complaint with complete evidence is eligible for immediate replacement, pending stock availability, without waiting for the carrier claim outcome.",
+      "ruleVersion": "v1.2"
+    },
+    "customerReplyDraft": {
+      "language": "sk",
+      "text": "Je nám ľúto, že váza dorazila poškodená. Po doručení fotografie vonkajšieho obalu vám obratom pošleme náhradný kus.",
+      "internalSummaryEn": "Fragile-goods damage claim, product photo received, outer-packaging photo requested. Replacement recommended once evidence is complete."
+    }
+  },
+  "recoveryDraft": {
+    "id": "rec-001",
+    "caseId": "case-001",
+    "counterparty": "NordicShip",
+    "claimType": "carrier_damage_claim",
+    "evidenceLinks": ["att-001"],
+    "damageSummary": "Glass vase (SKU VASE-GLASS-30CM) received shattered. Outer-packaging photo pending from customer before claim submission.",
+    "estimatedRecoverableAmount": 34.9,
+    "currency": "EUR",
+    "nextAction": "Await outer-packaging photo, then submit claim within NordicShip's 14-day window (delivered 2026-09-08).",
+    "status": "draft"
+  }
+}

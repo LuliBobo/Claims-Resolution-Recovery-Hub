@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claims-resolution-recovery-hub/schema/shipment.schema.json",
+  "title": "Shipment",
+  "type": "object",
+  "required": ["carrier", "trackingId", "deliveryDate"],
+  "properties": {
+    "carrier": { "type": "string" },
+    "trackingId": { "type": "string" },
+    "deliveryDate": { "type": "string", "format": "date" },
+    "route": { "type": "string" },
+    "warehouse": { "type": "string" }
+  }
+}

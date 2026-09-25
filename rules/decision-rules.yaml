@@ -1,0 +1,86 @@
+# Decision routing rules for Claims Resolution & Recovery Hub
+#
+# PROTOTYPE ASSUMPTIONS FOR DEMONSTRATION ONLY.
+# These thresholds are not legal or regulatory standards and must not be
+# presented to end users as such. No language model may silently override
+# the workflow rule these scores select.
+
+version: "0.1.0"
+
+factors:
+  - id: evidence_completeness
+    label: "Evidence completeness"
+    scale:
+      0: "Complete"
+      1: "Minor gap"
+      2: "Material gap"
+      3: "Insufficient"
+  - id: policy_clarity
+    label: "Policy clarity"
+    scale:
+      0: "Explicit rule"
+      1: "Likely rule"
+      2: "Ambiguous rule"
+      3: "No rule"
+  - id: customer_impact
+    label: "Customer impact"
+    scale:
+      0: "Low"
+      1: "Moderate"
+      2: "Significant"
+      3: "Critical"
+  - id: business_exposure
+    label: "Business exposure"
+    scale:
+      0: "Negligible"
+      1: "Manageable"
+      2: "Material"
+      3: "High"
+  - id: recovery_potential
+    label: "Recovery potential"
+    scale:
+      0: "None"
+      1: "Uncertain"
+      2: "Probable"
+      3: "Strong"
+
+# Total score = sum of the five factor scores (range 0-15).
+workflow_routing:
+  - score_range: [0, 4]
+    path: quick_review
+    label: "Draft recommendation and allow quick review"
+  - score_range: [5, 7]
+    path: evidence_or_supervisor_check
+    label: "Require evidence completion or supervisor check"
+  - score_range: [8, 10]
+    path: human_approval_required
+    label: "Require explicit human approval"
+  - score_range: [11, 15]
+    path: escalate_block_auto_closure
+    label: "Escalate and block automatic closure"
+
+display_requirements:
+  - "Every recommendation must show the contributing factor scores."
+  - "Every recommendation must cite the policy source (document + excerpt + rule version) it relied on."
+  - "Every recommendation must list missing information, if any."
+
+case_types:
+  - withdrawal
+  - damaged_delivery
+  - defective_product
+  - wrong_item
+  - missing_item
+  - other
+
+resolution_options:
+  - refund
+  - replacement
+  - partial_credit
+  - escalation
+  - rejection
+
+recovery_claim_types:
+  - carrier_damage_claim
+  - carrier_loss_claim
+  - supplier_defect_claim
+  - supplier_shortage_claim

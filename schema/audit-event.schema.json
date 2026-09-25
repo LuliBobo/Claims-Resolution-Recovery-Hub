@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claims-resolution-recovery-hub/schema/audit-event.schema.json",
+  "title": "AuditEvent",
+  "type": "object",
+  "required": ["id", "caseId", "actor", "event", "timestamp"],
+  "properties": {
+    "id": { "type": "string" },
+    "caseId": { "type": "string" },
+    "actor": { "type": "string", "description": "Agent name or human reviewer identifier" },
+    "event": { "type": "string" },
+    "beforeState": { "type": "object" },
+    "afterState": { "type": "object" },
+    "linkedRule": { "type": "string" },
+    "outcome": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

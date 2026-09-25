@@ -1,0 +1,99 @@
+{
+  "case": {
+    "id": "case-002",
+    "source": "form",
+    "language": "en",
+    "customer": { "name": "Marek Novák", "email": "marek.novak@example.com" },
+    "orderReference": "ORD-48250",
+    "complaintText": "I ordered the black ceramic mug set but received a blue one instead.",
+    "salesChannel": "webshop",
+    "desiredOutcome": "correct_item",
+    "status": "awaiting_approval",
+    "caseType": "wrong_item",
+    "classificationConfidence": 0.9,
+    "createdAt": "2026-09-12T11:02:00Z",
+    "updatedAt": "2026-09-12T11:10:00Z",
+    "attachmentIds": ["att-002", "att-003"],
+    "resolutionProposalId": "res-002",
+    "recoveryDraftId": null
+  },
+  "order": {
+    "orderId": "ORD-48250",
+    "date": "2026-09-07",
+    "sku": "MUGSET-CERAMIC-BLK",
+    "quantity": 1,
+    "salesChannel": "webshop",
+    "paymentStatus": "paid",
+    "supplierId": "SUP-CERAWORKS",
+    "shipmentId": "SHP-77260"
+  },
+  "shipment": {
+    "carrier": "NordicShip",
+    "trackingId": "NS7742601SK",
+    "deliveryDate": "2026-09-10",
+    "route": "Bratislava depot -> local delivery",
+    "warehouse": "WH-BA-01"
+  },
+  "attachments": [
+    {
+      "id": "att-002",
+      "caseId": "case-002",
+      "fileType": "image",
+      "imageCategory": "product_photo",
+      "confidence": 0.95,
+      "extractedNotes": "Blue ceramic mug set visible, does not match ordered black variant.",
+      "fileName": "mugset-received.jpg",
+      "uploadedAt": "2026-09-12T11:03:00Z"
+    },
+    {
+      "id": "att-003",
+      "caseId": "case-002",
+      "fileType": "pdf",
+      "imageCategory": "invoice",
+      "confidence": 0.99,
+      "extractedNotes": "Order confirmation shows SKU MUGSET-CERAMIC-BLK (black variant).",
+      "fileName": "order-48250-invoice.pdf",
+      "uploadedAt": "2026-09-12T11:04:00Z"
+    }
+  ],
+  "evidenceCheck": {
+    "required": ["product_photo", "invoice"],
+    "present": ["product_photo", "invoice"],
+    "missing": [],
+    "generatedCustomerRequest": null
+  },
+  "resolutionProposal": {
+    "id": "res-002",
+    "caseId": "case-002",
+    "recommendation": "replacement",
+    "rationale": "Wrong-item complaint with complete evidence (received-item photo + invoice). Policy requires shipping the correct item and issuing a prepaid return label (Complaint Guide 5.2). This is the third wrong-item case for this SKU in 30 days, so also flagged for supplier review.",
+    "confidence": 0.88,
+    "valueImpact": -12.5,
+    "factorScores": {
+      "evidenceCompleteness": 0,
+      "policyClarity": 0,
+      "customerImpact": 1,
+      "businessExposure": 1,
+      "recoveryPotential": 1
+    },
+    "workflowPath": "quick_review",
+    "policySource": {
+      "documentName": "Merchant Complaint Guide",
+      "excerpt": "5.2 Confirmed wrong-item cases are resolved by shipping the correct item and issuing a prepaid return label for the incorrect item.",
+      "ruleVersion": "v1.2"
+    },
+    "customerReplyDraft": {
+      "language": "en",
+      "text": "We're sorry about the mix-up. We're shipping the correct black ceramic mug set today and have emailed you a prepaid return label for the blue set.",
+      "internalSummaryEn": "Wrong-item case, complete evidence, correct item to be shipped plus prepaid return label. Third occurrence for this SKU in 30 days — flagged for supplier review."
+    }
+  },
+  "insightSignal": {
+    "sku": "MUGSET-CERAMIC-BLK",
+    "supplierId": "SUP-CERAWORKS",
+    "issueType": "wrong_item",
+    "frequency": 3,
+    "periodStart": "2026-08-13",
+    "periodEnd": "2026-09-12"
+  }
+}

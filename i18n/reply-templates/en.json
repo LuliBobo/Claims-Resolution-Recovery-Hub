@@ -1,0 +1,10 @@
+{
+  "language": "en",
+  "templates": {
+    "evidence_request_damage": "Thank you for reporting the damage and for the photo(s) you sent. To process your case quickly, please also send a photo of the outer packaging (the box) as it arrived. One photo showing the box condition is enough.",
+    "resolution_replacement": "We're sorry your item arrived damaged. We're sending a replacement as soon as we confirm the remaining evidence.",
+    "resolution_wrong_item": "We're sorry about the mix-up. We're shipping the correct item today and have emailed you a prepaid return label for the incorrect one.",
+    "resolution_refund": "We're sorry for the inconvenience. A refund has been issued to your original payment method.",
+    "acknowledgement": "Thank you for reaching out. We've received your complaint and are reviewing it now."
+  }
+}
