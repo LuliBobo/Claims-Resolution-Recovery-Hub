@@ -2,15 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/shipment.schema.json",
   "title": "Shipment",
-  "description": "Maps to the 'Shipments' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25).",
   "type": "object",
-  "required": ["shipmentId", "orderId", "carrier"],
+  "required": ["id", "linked_order_id", "carrier"],
   "properties": {
-    "shipmentId": { "type": "string" },
-    "orderId": { "type": "string" },
-    "carrier": { "type": "string", "enum": ["DPD", "Packeta", "DHL", "GLS"] },
-    "trackingNumber": { "type": "string" },
-    "deliveryDate": { "type": "string", "format": "date" },
-    "deliveryStatus": { "type": "string" }
+    "id": { "type": "string" },
+    "linked_order_id": { "type": "string", "description": "FK -> Order.id" },
+    "carrier": { "type": "string" },
+    "tracking_number": { "type": "string" },
+    "warehouse": { "type": "string" },
+    "ship_date": { "type": "string", "format": "date" },
+    "delivery_date": { "type": "string", "format": "date" },
+    "delivery_status": { "type": "string", "enum": ["pending", "in_transit", "delivered", "delayed", "lost", "returned"] }
   }
 }

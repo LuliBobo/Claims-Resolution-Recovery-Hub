@@ -2,16 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/insight-record.schema.json",
   "title": "InsightRecord",
-  "description": "Maps to the 'Insight Records' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). Derived/recomputed aggregate, no FK.",
   "type": "object",
-  "required": ["recordId", "sku", "issueType", "frequency"],
+  "required": ["id", "sku", "issue_type", "frequency"],
   "properties": {
-    "recordId": { "type": "string" },
+    "id": { "type": "string" },
     "sku": { "type": "string" },
-    "productName": { "type": "string" },
-    "carrierName": { "type": "string" },
-    "issueType": { "type": "string" },
+    "carrier": { "type": "string" },
+    "supplier": { "type": "string" },
+    "warehouse": { "type": "string" },
+    "issue_type": { "type": "string" },
     "frequency": { "type": "integer", "minimum": 0 },
-    "totalLossAmount": { "type": "number" }
+    "trend_direction": { "type": "string", "enum": ["up", "down", "stable"] }
   }
 }

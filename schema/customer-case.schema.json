@@ -2,25 +2,27 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/customer-case.schema.json",
   "title": "CustomerCase",
-  "description": "Maps to the 'Customer Cases' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25), which supersedes docs/claimflow-luo-playbook.md as the source for this schema.",
   "type": "object",
-  "required": ["caseId", "customerName", "language", "status", "caseType"],
+  "required": ["id", "created_at", "source", "status", "case_type"],
   "properties": {
-    "caseId": { "type": "string", "description": "Luo field: Case ID, e.g. #CAS-2026-089" },
-    "customerName": { "type": "string" },
-    "email": { "type": "string" },
-    "language": { "type": "string", "description": "BCP-47 language tag, e.g. en, sk" },
-    "orderReference": { "type": "string" },
-    "channel": { "type": "string", "description": "Sales/intake channel, e.g. webshop, email" },
-    "status": {
-      "type": "string",
-      "enum": ["new", "awaiting_evidence", "awaiting_approval", "approved", "rejected", "escalated", "closed"]
-    },
-    "caseType": {
-      "type": "string",
-      "enum": ["damaged_delivery", "wrong_item", "missing_item", "defective_product", "return_request", "other"]
-    },
-    "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
-    "createdAt": { "type": "string", "format": "date-time" }
+    "id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "enum": ["email", "chat", "phone", "marketplace", "web_form", "other"] },
+    "status": { "type": "string", "enum": ["new", "in_review", "awaiting_approval", "resolved", "escalated", "closed"] },
+    "case_type": { "type": "string", "enum": ["damaged_delivery", "wrong_item", "missing_item", "return_request", "other"] },
+    "customer_name": { "type": "string", "description": "The inventory only reports 'customer identifiers' without naming exact fields - this split into customer_name/customer_email is inferred, not confirmed. Verify against the live schema." },
+    "customer_email": { "type": "string", "description": "See customer_name note - inferred, not confirmed by the inventory." },
+    "customer_language": { "type": "string", "description": "BCP-47 language tag, e.g. en, sk" },
+    "order_reference": { "type": "string" },
+    "complaint_text": { "type": "string" },
+    "internal_english_summary": { "type": "string" },
+    "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+    "linked_order_id": { "type": "string", "description": "Optional FK -> Order.id" },
+    "linked_shipment_id": { "type": "string", "description": "Optional FK -> Shipment.id" },
+    "resolution_recommendation": { "type": "string", "description": "Denormalized recommendation text written by create/regenerate paths. Not guaranteed consistent with the linked ResolutionProposal record(s) - see docs/migration/05_migration_dependencies.md." },
+    "recovery_needed": { "type": "boolean" },
+    "assigned_reviewer": { "type": "string" },
+    "resolved_at": { "type": "string", "format": "date-time" }
   }
 }

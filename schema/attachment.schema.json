@@ -2,17 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/attachment.schema.json",
   "title": "Attachment",
-  "description": "Maps to the 'Attachments' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). No creation timestamp field exists on the live entity - do not add one.",
   "type": "object",
-  "required": ["attachmentId", "caseId", "fileName", "imageCategory"],
+  "required": ["id", "linked_case_id", "file_name", "attachment_category"],
   "properties": {
-    "attachmentId": { "type": "string" },
-    "caseId": { "type": "string", "description": "Linked CustomerCase.caseId" },
-    "fileName": { "type": "string" },
-    "imageCategory": {
-      "type": "string",
-      "enum": ["product", "packaging", "shipping_label", "invoice", "other"]
-    },
-    "status": { "type": "string", "enum": ["uploaded", "verified", "rejected"] }
+    "id": { "type": "string" },
+    "linked_case_id": { "type": "string", "description": "FK -> CustomerCase.id" },
+    "file_name": { "type": "string" },
+    "file_type": { "type": "string", "description": "No enum confirmed by the inventory." },
+    "attachment_category": { "type": "string", "enum": ["photo_evidence", "invoice", "shipping_label", "correspondence", "other"] },
+    "ai_notes": { "type": "string" },
+    "evidence_status": { "type": "string", "enum": ["pending_review", "sufficient", "insufficient", "not_applicable"] }
   }
 }

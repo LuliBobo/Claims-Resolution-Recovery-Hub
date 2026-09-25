@@ -2,14 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/policy-document.schema.json",
   "title": "PolicyDocument",
-  "description": "Maps to the 'Policy Documents' entity in docs/claimflow-luo-playbook.md, Phase 1. There is no separate Rule entity in the playbook: rule content lives in contentSummary.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). Root entity, no FK. Rule.linked_policy_document_id references this entity's id.",
   "type": "object",
-  "required": ["policyId", "title", "category", "version"],
+  "required": ["id", "name", "document_type", "version"],
   "properties": {
-    "policyId": { "type": "string" },
-    "title": { "type": "string" },
-    "category": { "type": "string", "enum": ["return", "warranty", "carrier_claim"] },
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "document_type": { "type": "string", "enum": ["policy", "terms", "carrier_agreement", "supplier_agreement", "other"] },
     "version": { "type": "string" },
-    "contentSummary": { "type": "string" }
+    "jurisdiction": { "type": "string" },
+    "active_status": { "type": "boolean" },
+    "summary": { "type": "string" }
   }
 }

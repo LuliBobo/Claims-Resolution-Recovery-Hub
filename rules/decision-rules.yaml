@@ -6,13 +6,14 @@
 # the workflow rule these scores select.
 #
 # This is a cross-cutting overlay on top of the entity schema in schema/,
-# which follows docs/claimflow-luo-playbook.md. The playbook's own database
-# entities (Resolution Proposals, Human Approvals) don't store this five-factor
-# breakdown directly - it is meant to be computed/displayed alongside them
-# (see docs/claimflow-luo-playbook.md Step 2.1 evidence checklist and
-# docs/luo-modular-prompts.md Prompt 12 for how to wire it into Luo).
+# which as of 2026-09-25 follows docs/migration/ (a live code/schema
+# inspection of the deployed build), not docs/claimflow-luo-playbook.md.
+# None of the 11 live entities store this five-factor breakdown directly -
+# it is meant to be computed/displayed alongside them, e.g. from
+# ResolutionProposal.rationale / customer_impact / business_exposure and
+# the Attachment evidence_status values.
 
-version: "0.2.0"
+version: "0.3.0"
 
 factors:
   - id: evidence_completeness
@@ -71,25 +72,35 @@ display_requirements:
   - "Every recommendation must cite the policy source (document + excerpt + rule version) it relied on."
   - "Every recommendation must list missing information, if any."
 
-# Matches CustomerCase.caseType in schema/customer-case.schema.json.
+# Matches CustomerCase.case_type and Rule.trigger_type in schema/customer-case.schema.json
+# and schema/rule.schema.json, per docs/migration/04_data_dictionary.md.
+# NOTE: "defective_product" was in an earlier version of this list (from
+# docs/claimflow-luo-playbook.md) but the live inventory's case_type enum does
+# NOT include it - removed.
 case_types:
   - damaged_delivery
   - wrong_item
   - missing_item
-  - defective_product
   - return_request
   - other
 
-# Matches ResolutionProposal.recommendedAction in schema/resolution-proposal.schema.json.
-resolution_options:
-  - replacement
-  - refund
-  - store_credit
-  - reject
+# UNCONFIRMED. docs/migration/04_data_dictionary.md does not report an enum for
+# ResolutionProposal.recommendation or Rule.recommended_resolution - both are
+# free text in the live build. An earlier version of this file listed
+# replacement/refund/store_credit/reject as a fixed enum (from
+# docs/claimflow-luo-playbook.md); that has been removed as unconfirmed by the
+# more authoritative live inspection. These are example values only, useful
+# for prompt-writing and demo-data consistency, NOT a schema constraint.
+example_resolution_recommendations:
+  - "Replacement"
+  - "Refund"
+  - "Store credit"
+  - "Request Missing Evidence"
+  - "Reject"
 
-# RecoveryDraft.claimReason (schema/recovery-draft.schema.json) is free text in the
-# playbook, not a fixed enum. These are example values only, for prompt-writing
-# and demo-data consistency, not a schema constraint.
+# RecoveryDraft.claim_type (schema/recovery-draft.schema.json) is free text
+# per docs/migration/04_data_dictionary.md, not a fixed enum. Example values
+# only, for prompt-writing and demo-data consistency.
 example_claim_reasons:
   - "Shipping damage - carrier claim"
   - "Item lost in transit - carrier claim"

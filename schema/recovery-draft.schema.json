@@ -2,17 +2,19 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/recovery-draft.schema.json",
   "title": "RecoveryDraft",
-  "description": "Maps to the 'Recovery Drafts' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). 'sent' is a manual status attestation in the live build, not confirmation of an actual outbound carrier/email transmission - no outbound integration exists.",
   "type": "object",
-  "required": ["recoveryId", "caseId", "counterpartyType", "counterpartyName", "status"],
+  "required": ["id", "linked_case_id", "counterparty_type", "counterparty_name", "status"],
   "properties": {
-    "recoveryId": { "type": "string" },
-    "caseId": { "type": "string" },
-    "counterpartyType": { "type": "string", "enum": ["carrier", "supplier"] },
-    "counterpartyName": { "type": "string" },
-    "claimReason": { "type": "string" },
-    "estimatedRecoverableAmount": { "type": "number" },
-    "currency": { "type": "string" },
-    "status": { "type": "string", "enum": ["draft", "pending_review", "submitted", "recovered"] }
+    "id": { "type": "string" },
+    "linked_case_id": { "type": "string", "description": "FK -> CustomerCase.id" },
+    "counterparty_type": { "type": "string", "enum": ["carrier", "supplier"] },
+    "counterparty_name": { "type": "string" },
+    "claim_type": { "type": "string", "description": "No enum confirmed by the inventory - treat as free text unless verified otherwise." },
+    "draft_text": { "type": "string" },
+    "estimated_recoverable_value": { "type": "number" },
+    "status": { "type": "string", "enum": ["draft", "pending_approval", "approved", "sent", "rejected", "resolved"] },
+    "approved_at": { "type": "string", "format": "date-time" },
+    "sent_at": { "type": "string", "format": "date-time" }
   }
 }

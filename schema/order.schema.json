@@ -2,17 +2,19 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/order.schema.json",
   "title": "Order",
-  "description": "Maps to the 'Orders' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md (2026-09-25), which supersedes docs/claimflow-luo-playbook.md as the source for this schema. Root entity, no FK.",
   "type": "object",
-  "required": ["orderId", "orderDate", "sku", "productName"],
+  "required": ["id", "order_date", "sku", "product_name"],
   "properties": {
-    "orderId": { "type": "string" },
-    "orderDate": { "type": "string", "format": "date" },
+    "id": { "type": "string" },
+    "order_date": { "type": "string", "format": "date" },
+    "sales_channel": { "type": "string" },
+    "customer_name": { "type": "string", "description": "The inventory only reports 'customer identifiers' on Order without naming exact fields - this split into customer_name/customer_email is inferred, not confirmed. Verify against the live schema." },
+    "customer_email": { "type": "string", "description": "See customer_name note - inferred, not confirmed by the inventory." },
     "sku": { "type": "string" },
-    "productName": { "type": "string" },
-    "itemValue": { "type": "number" },
-    "currency": { "type": "string" },
-    "salesChannel": { "type": "string" },
-    "customerId": { "type": "string" }
+    "product_name": { "type": "string" },
+    "quantity": { "type": "integer", "minimum": 1 },
+    "order_value": { "type": "number" },
+    "supplier": { "type": "string" }
   }
 }

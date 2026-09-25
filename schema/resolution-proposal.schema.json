@@ -2,15 +2,19 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/resolution-proposal.schema.json",
   "title": "ResolutionProposal",
-  "description": "Maps to the 'Resolution Proposals' entity in docs/claimflow-luo-playbook.md, Phase 1.",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). No creation timestamp field exists on the live entity, and there is no active/current-proposal marker - a case can have multiple ResolutionProposal rows with no way to determine which is authoritative beyond partial, unreliable text-matching against CustomerCase.resolution_recommendation. See docs/migration/README.md.",
   "type": "object",
-  "required": ["proposalId", "caseId", "recommendedAction", "rationale"],
+  "required": ["id", "linked_case_id", "recommendation", "rationale"],
   "properties": {
-    "proposalId": { "type": "string" },
-    "caseId": { "type": "string" },
-    "recommendedAction": { "type": "string", "enum": ["replacement", "refund", "store_credit", "reject"] },
+    "id": { "type": "string" },
+    "linked_case_id": { "type": "string", "description": "FK -> CustomerCase.id" },
+    "recommendation": { "type": "string", "description": "No enum confirmed by the inventory - earlier versions of this schema assumed a fixed enum (replacement/refund/store_credit/reject) from docs/claimflow-luo-playbook.md; that is unconfirmed by the live inspection and has been removed. Treat as free text unless verified otherwise." },
     "rationale": { "type": "string" },
-    "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
-    "estimatedCost": { "type": "number" }
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "customer_impact": { "type": "string", "description": "No enum confirmed by the inventory." },
+    "business_exposure": { "type": "string", "description": "No enum confirmed by the inventory." },
+    "policy_source": { "type": "string", "description": "Free text, per the inventory - not a structured reference to a PolicyDocument/Rule id." },
+    "needs_human_approval": { "type": "boolean" },
+    "status": { "type": "string", "enum": ["pending_approval", "approved", "rejected", "sent"] }
   }
 }

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claims-resolution-recovery-hub/schema/rule.schema.json",
+  "title": "Rule",
+  "description": "Restored per the live code/schema inspection in docs/migration/01_verified_inventory.md (2026-09-25): Rule is a real, separate entity in the live build (11 entities total). An earlier reconciliation against docs/claimflow-luo-playbook.md removed this entity because that build-intent document didn't list it separately - that was wrong; the playbook described intent, this describes what was actually deployed.",
+  "type": "object",
+  "required": ["id", "trigger_type", "active_status"],
+  "properties": {
+    "id": { "type": "string" },
+    "trigger_type": { "type": "string", "enum": ["damaged_delivery", "wrong_item", "missing_item", "return_request", "other"] },
+    "required_evidence": { "type": "string", "description": "No enum confirmed by the inventory - treat as free text/structured note unless verified otherwise." },
+    "recommended_resolution": { "type": "string", "description": "No enum confirmed by the inventory - treat as free text unless verified otherwise." },
+    "escalation_path": { "type": "string" },
+    "linked_policy_document_id": { "type": "string", "description": "Optional FK -> PolicyDocument.id" },
+    "active_status": { "type": "boolean" }
+  }
+}

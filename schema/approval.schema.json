@@ -1,17 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/approval.schema.json",
-  "title": "Approval",
-  "description": "Maps to the 'Human Approvals' entity in docs/claimflow-luo-playbook.md, Phase 1. The playbook's own Step 2.3 UI ('Approve Both & Dispatch', 'Edit Drafts', 'Reject / Escalate') maps onto this entity's decision values rather than adding new ones: Approve Both & Dispatch -> approved, Edit Drafts -> approved_with_edits, Reject / Escalate -> rejected (with escalation captured in notes/severity, not as a separate decision). NOTE: the playbook's Phase 1 prompt asked for a Timestamp field, but a live inspection of the Luo build (2026-09-25 migration inventory) found human_approval has no timestamp column at all - timestamp is kept here as the intended/target field but marked optional, not required, until the live implementation actually has it.",
+  "title": "HumanApproval",
+  "description": "Matches the live code/schema inspection in docs/migration/01_verified_inventory.md and 04_data_dictionary.md (2026-09-25). No creation timestamp field exists on the live entity - only decision_time. The 'approved_with_edits' decision value assumed by an earlier reconciliation against docs/claimflow-luo-playbook.md does NOT exist in the live build - decision has exactly 3 values.",
   "type": "object",
-  "required": ["approvalId", "caseId", "actionType", "reviewerName", "decision"],
+  "required": ["id", "linked_case_id", "approval_type", "reviewer", "decision"],
   "properties": {
-    "approvalId": { "type": "string" },
-    "caseId": { "type": "string" },
-    "actionType": { "type": "string", "description": "e.g. customer_reply, recovery_claim, both" },
-    "reviewerName": { "type": "string" },
-    "decision": { "type": "string", "enum": ["approved", "approved_with_edits", "rejected"] },
-    "notes": { "type": "string" },
-    "timestamp": { "type": "string", "format": "date-time" }
+    "id": { "type": "string" },
+    "linked_case_id": { "type": "string", "description": "FK -> CustomerCase.id" },
+    "approval_type": { "type": "string", "enum": ["resolution_proposal", "recovery_draft"] },
+    "linked_resolution_proposal_id": { "type": "string", "description": "Optional FK -> ResolutionProposal.id, present when approval_type is resolution_proposal." },
+    "linked_recovery_draft_id": { "type": "string", "description": "Optional FK -> RecoveryDraft.id, present when approval_type is recovery_draft." },
+    "reviewer": { "type": "string" },
+    "decision": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+    "reviewer_comment": { "type": "string" },
+    "decision_time": { "type": "string", "format": "date-time" }
   }
 }
