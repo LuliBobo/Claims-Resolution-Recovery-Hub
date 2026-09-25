@@ -1,0 +1,17 @@
+{
+  "_source": "Derived from docs/reports/complaint-recovery-risk-report-2026-09-25.pdf (live Luo query). This is a PARTIAL stub, not a full case record like damaged-vase.json/wrong-item.json.",
+  "_verified_fields": ["sku", "productName", "carrier", "caseType", "complaintCount", "estimatedRecoverableAmount", "trend"],
+  "_unverified_fields": "caseId, customerName, email, language, orderReference and exact dates are NOT given by the risk report and are deliberately left unset rather than invented. The earlier Luo status report named three synthetic customers (Martin Horvath, Nadia Petrov, Tomas Novak) alongside Elena Rostova; Martin Horvath is already confirmed as the wrong-item/t-shirt case (see wrong-item.json), but which of the other two names belongs to this mug-set case is not confirmed by anything read in this session - do not assume it's Nadia Petrov or Tomas Novak without checking Luo directly.",
+  "sku": "HOME-MUG-CER-02",
+  "productName": "Ceramic Mug Set (Set of 4)",
+  "caseType": "damaged_delivery",
+  "carrier": "Packeta",
+  "complaintCount": 1,
+  "trend": "up",
+  "recoverySummary": {
+    "estimatedRecoverableAmount": 45.00,
+    "currency": "EUR",
+    "recoveryDraftStatus": "draft",
+    "note": "Per the risk report, a Human Approval already approved this recovery draft ('approved-but-unsent'), but the RecoveryDraft record itself should stay status 'draft' (never 'submitted') - this MVP intentionally never connects to a live carrier system, see docs/concept.md's Recovery Agent guardrail and schema/recovery-draft.schema.json."
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "_source": "docs/reports/complaint-recovery-risk-report-2026-09-25.pdf, generated live from Luo data on 2026-09-25. Sample is small (4 total cases) - the report itself flags this as a baseline, not a statistically robust ranking.",
+  "records": [
+    {
+      "recordId": "INS-2026-09-25-1",
+      "sku": "HOME-VASE-GL-01",
+      "productName": "Venetian Glass Vase",
+      "carrierName": "DPD",
+      "issueType": "damaged_delivery",
+      "frequency": 1,
+      "totalLossAmount": 89.00,
+      "trend": "insufficient_data"
+    },
+    {
+      "recordId": "INS-2026-09-25-2",
+      "sku": "HOME-MUG-CER-02",
+      "productName": "Ceramic Mug Set (Set of 4)",
+      "carrierName": "Packeta",
+      "issueType": "damaged_delivery",
+      "frequency": 1,
+      "totalLossAmount": 45.00,
+      "trend": "up"
+    },
+    {
+      "recordId": "INS-2026-09-25-3",
+      "sku": "ACC-BELT-BRN-M",
+      "productName": "Leather Belt - Brown, Size M",
+      "carrierName": "GLS",
+      "issueType": "return_request",
+      "frequency": 1,
+      "totalLossAmount": 0,
+      "trend": "up"
+    },
+    {
+      "recordId": "INS-2026-09-25-4",
+      "sku": "APP-TEE-BLK-L",
+      "productName": "Cotton T-Shirt Black L",
+      "carrierName": "Packeta",
+      "issueType": "wrong_item",
+      "frequency": 1,
+      "totalLossAmount": 0,
+      "trend": "insufficient_data"
+    }
+  ]
+}

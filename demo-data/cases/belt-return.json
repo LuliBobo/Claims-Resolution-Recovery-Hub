@@ -1,0 +1,17 @@
+{
+  "_source": "Derived from docs/reports/complaint-recovery-risk-report-2026-09-25.pdf (live Luo query). This is a PARTIAL stub, not a full case record like damaged-vase.json/wrong-item.json.",
+  "_verified_fields": ["sku", "productName", "carrier", "caseType", "complaintCount", "estimatedRecoverableAmount", "trend"],
+  "_unverified_fields": "caseId, customerName, email, language, orderReference and exact dates are NOT given by the risk report and are deliberately left unset rather than invented. See the same caveat in mug-set-damaged.json about which synthetic customer name (Nadia Petrov / Tomas Novak) this case actually belongs to.",
+  "sku": "ACC-BELT-BRN-M",
+  "productName": "Leather Belt - Brown, Size M",
+  "caseType": "return_request",
+  "carrier": "GLS",
+  "complaintCount": 1,
+  "trend": "up",
+  "recoverySummary": {
+    "estimatedRecoverableAmount": 0,
+    "currency": "EUR",
+    "recoveryDraftStatus": null,
+    "note": "No recovery claim - no carrier or supplier fault implicated, per the risk report's Observations."
+  }
+}
