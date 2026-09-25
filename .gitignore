@@ -1,0 +1,8 @@
+.DS_Store
+
+# Sensitive / internal-only files (contain real-looking customer data) - see PUBLIC_REPOSITORY_REVIEW.md
+Migration/migration_handoff_internal_07_case_inventory_elena_rostova_INTERNAL_ONLY.md
+Migration/migration_handoff_PUBLIC_REPOSITORY_REVIEW.md
+Migration/migration_handoff_internal_01_verified_inventory.md
+Migration/migration_handoff_internal_02_business_rules_and_workflows.md
+claimflow_luo_playbook.md

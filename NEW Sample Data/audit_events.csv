@@ -1,0 +1,180 @@
+audit_event_number,case_number,event_name,occurred_at,actor_type,event_details
+TEST-AUD-2026-0001,TEST-CASE-2026-0001,customer_case_created,2026-01-09T10:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0001 created with type missing_item and priority urgent.
+TEST-AUD-2026-0002,TEST-CASE-2026-0001,attachment_added,2026-01-09T11:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0001 (proof_of_delivery) added to case TEST-CASE-2026-0001.
+TEST-AUD-2026-0003,TEST-CASE-2026-0001,attachment_added,2026-01-09T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0002 (shipping_label_photo) added to case TEST-CASE-2026-0001.
+TEST-AUD-2026-0004,TEST-CASE-2026-0001,resolution_proposal_generated,2026-01-09T16:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0001 generated with recommendation 'Escalate for Manual Review'.
+TEST-AUD-2026-0005,TEST-CASE-2026-0001,human_approval_created,2026-01-09T18:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0001 requested for resolution_proposal TEST-RP-2026-0001.
+TEST-AUD-2026-0006,TEST-CASE-2026-0002,customer_case_created,2026-01-18T11:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0002 created with type damaged_delivery and priority low.
+TEST-AUD-2026-0007,TEST-CASE-2026-0002,attachment_added,2026-01-18T12:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0003 (damaged_item_photo) added to case TEST-CASE-2026-0002.
+TEST-AUD-2026-0008,TEST-CASE-2026-0002,resolution_proposal_generated,2026-01-18T17:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0002 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0009,TEST-CASE-2026-0002,recovery_draft_created,2026-01-18T21:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0001 created against carrier 'Packeta'.
+TEST-AUD-2026-0010,TEST-CASE-2026-0002,recovery_draft_updated,2026-01-19T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0001 updated to status 'approved'.
+TEST-AUD-2026-0011,TEST-CASE-2026-0002,customer_case_updated,2026-01-20T14:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0002 status updated to 'resolved'.
+TEST-AUD-2026-0012,TEST-CASE-2026-0003,customer_case_created,2026-01-25T12:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0003 created with type missing_item and priority medium.
+TEST-AUD-2026-0013,TEST-CASE-2026-0003,attachment_added,2026-01-25T13:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0004 (proof_of_delivery) added to case TEST-CASE-2026-0003.
+TEST-AUD-2026-0014,TEST-CASE-2026-0003,attachment_added,2026-01-25T16:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0005 (shipping_label_photo) added to case TEST-CASE-2026-0003.
+TEST-AUD-2026-0015,TEST-CASE-2026-0003,resolution_proposal_generated,2026-01-25T18:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0003 generated with recommendation 'Request Missing Evidence'.
+TEST-AUD-2026-0016,TEST-CASE-2026-0003,human_approval_created,2026-01-25T20:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0002 requested for resolution_proposal TEST-RP-2026-0003.
+TEST-AUD-2026-0017,TEST-CASE-2026-0004,customer_case_created,2026-02-17T13:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0004 created with type damaged_delivery and priority medium.
+TEST-AUD-2026-0018,TEST-CASE-2026-0004,attachment_added,2026-02-17T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0006 (damaged_item_photo) added to case TEST-CASE-2026-0004.
+TEST-AUD-2026-0019,TEST-CASE-2026-0004,resolution_proposal_generated,2026-02-17T19:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0004 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0020,TEST-CASE-2026-0004,recovery_draft_created,2026-02-17T23:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0002 created against carrier 'Packeta'.
+TEST-AUD-2026-0021,TEST-CASE-2026-0004,recovery_draft_updated,2026-02-18T07:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0002 updated to status 'approved'.
+TEST-AUD-2026-0022,TEST-CASE-2026-0005,customer_case_created,2026-02-21T14:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0005 created with type return_request and priority medium.
+TEST-AUD-2026-0023,TEST-CASE-2026-0005,attachment_added,2026-02-21T15:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0007 (invoice) added to case TEST-CASE-2026-0005.
+TEST-AUD-2026-0024,TEST-CASE-2026-0005,attachment_added,2026-02-21T18:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0008 (proof_of_delivery) added to case TEST-CASE-2026-0005.
+TEST-AUD-2026-0025,TEST-CASE-2026-0005,resolution_proposal_generated,2026-02-21T20:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0005 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0026,TEST-CASE-2026-0005,human_approval_created,2026-02-21T22:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0003 requested for resolution_proposal TEST-RP-2026-0005.
+TEST-AUD-2026-0027,TEST-CASE-2026-0005,recovery_draft_created,2026-02-22T00:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0003 created against supplier 'Tatra Outdoor Gear Ltd.'.
+TEST-AUD-2026-0028,TEST-CASE-2026-0005,human_approval_approved,2026-02-22T03:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0003 approved by Test Manager – Elena Rybárová.
+TEST-AUD-2026-0029,TEST-CASE-2026-0005,recovery_draft_updated,2026-02-22T08:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0003 updated to status 'sent'.
+TEST-AUD-2026-0030,TEST-CASE-2026-0005,customer_case_updated,2026-02-23T17:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0005 status updated to 'closed'.
+TEST-AUD-2026-0031,TEST-CASE-2026-0006,customer_case_created,2026-02-27T09:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0006 created with type return_request and priority low.
+TEST-AUD-2026-0032,TEST-CASE-2026-0006,attachment_added,2026-02-27T10:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0009 (invoice) added to case TEST-CASE-2026-0006.
+TEST-AUD-2026-0033,TEST-CASE-2026-0006,resolution_proposal_generated,2026-02-27T15:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0006 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0034,TEST-CASE-2026-0006,recovery_draft_created,2026-02-27T19:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0004 created against supplier 'Solaris Fitness Equipment s.r.o.'.
+TEST-AUD-2026-0035,TEST-CASE-2026-0006,customer_case_updated,2026-03-01T12:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0006 status updated to 'resolved'.
+TEST-AUD-2026-0036,TEST-CASE-2026-0007,customer_case_created,2026-03-14T10:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0007 created with type return_request and priority medium.
+TEST-AUD-2026-0037,TEST-CASE-2026-0007,attachment_added,2026-03-14T11:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0010 (invoice) added to case TEST-CASE-2026-0007.
+TEST-AUD-2026-0038,TEST-CASE-2026-0007,attachment_added,2026-03-14T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0011 (proof_of_delivery) added to case TEST-CASE-2026-0007.
+TEST-AUD-2026-0039,TEST-CASE-2026-0007,resolution_proposal_generated,2026-03-14T16:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0007 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0040,TEST-CASE-2026-0007,human_approval_created,2026-03-14T18:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0004 requested for resolution_proposal TEST-RP-2026-0007.
+TEST-AUD-2026-0041,TEST-CASE-2026-0008,customer_case_created,2026-03-16T11:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0008 created with type damaged_delivery and priority medium.
+TEST-AUD-2026-0042,TEST-CASE-2026-0008,attachment_added,2026-03-16T12:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0012 (damaged_item_photo) added to case TEST-CASE-2026-0008.
+TEST-AUD-2026-0043,TEST-CASE-2026-0008,resolution_proposal_generated,2026-03-16T17:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0008 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0044,TEST-CASE-2026-0008,human_approval_created,2026-03-16T19:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0006 requested for resolution_proposal TEST-RP-2026-0008.
+TEST-AUD-2026-0045,TEST-CASE-2026-0008,recovery_draft_created,2026-03-16T21:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0005 created against carrier 'Packeta'.
+TEST-AUD-2026-0046,TEST-CASE-2026-0008,human_approval_created,2026-03-16T23:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0005 requested for recovery_draft TEST-RD-2026-0005.
+TEST-AUD-2026-0047,TEST-CASE-2026-0008,human_approval_approved,2026-03-17T00:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0006 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0048,TEST-CASE-2026-0008,human_approval_approved,2026-03-17T04:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0005 approved by Test Manager – Boris Turčan.
+TEST-AUD-2026-0049,TEST-CASE-2026-0008,recovery_draft_updated,2026-03-17T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0005 updated to status 'sent'.
+TEST-AUD-2026-0050,TEST-CASE-2026-0008,customer_case_updated,2026-03-18T14:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0008 status updated to 'resolved'.
+TEST-AUD-2026-0051,TEST-CASE-2026-0009,customer_case_created,2026-03-25T12:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0009 created with type wrong_item and priority medium.
+TEST-AUD-2026-0052,TEST-CASE-2026-0009,attachment_added,2026-03-25T13:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0013 (damaged_item_photo) added to case TEST-CASE-2026-0009.
+TEST-AUD-2026-0053,TEST-CASE-2026-0009,attachment_added,2026-03-25T16:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0014 (invoice) added to case TEST-CASE-2026-0009.
+TEST-AUD-2026-0054,TEST-CASE-2026-0009,resolution_proposal_generated,2026-03-25T18:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0009 generated with recommendation 'Arrange Replacement Shipment'.
+TEST-AUD-2026-0055,TEST-CASE-2026-0009,human_approval_created,2026-03-25T20:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0007 requested for resolution_proposal TEST-RP-2026-0009.
+TEST-AUD-2026-0056,TEST-CASE-2026-0009,recovery_draft_created,2026-03-25T22:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0006 created against supplier 'Nordic Homeware Trading s.r.o.'.
+TEST-AUD-2026-0057,TEST-CASE-2026-0009,human_approval_approved,2026-03-26T01:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0007 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0058,TEST-CASE-2026-0010,customer_case_created,2026-03-29T13:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0010 created with type missing_item and priority high.
+TEST-AUD-2026-0059,TEST-CASE-2026-0010,attachment_added,2026-03-29T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0015 (proof_of_delivery) added to case TEST-CASE-2026-0010.
+TEST-AUD-2026-0060,TEST-CASE-2026-0010,resolution_proposal_generated,2026-03-29T19:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0010 generated with recommendation 'Request Missing Evidence'.
+TEST-AUD-2026-0061,TEST-CASE-2026-0011,customer_case_created,2026-04-18T14:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0011 created with type return_request and priority medium.
+TEST-AUD-2026-0062,TEST-CASE-2026-0011,attachment_added,2026-04-18T15:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0016 (invoice) added to case TEST-CASE-2026-0011.
+TEST-AUD-2026-0063,TEST-CASE-2026-0011,attachment_added,2026-04-18T18:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0017 (proof_of_delivery) added to case TEST-CASE-2026-0011.
+TEST-AUD-2026-0064,TEST-CASE-2026-0011,resolution_proposal_generated,2026-04-18T20:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0011 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0065,TEST-CASE-2026-0011,human_approval_created,2026-04-18T22:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0008 requested for resolution_proposal TEST-RP-2026-0011.
+TEST-AUD-2026-0066,TEST-CASE-2026-0011,human_approval_rejected,2026-04-19T03:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0008 rejected by Test Manager – Boris Turčan.
+TEST-AUD-2026-0067,TEST-CASE-2026-0012,customer_case_created,2026-04-22T09:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0012 created with type return_request and priority low.
+TEST-AUD-2026-0068,TEST-CASE-2026-0012,attachment_added,2026-04-22T10:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0018 (invoice) added to case TEST-CASE-2026-0012.
+TEST-AUD-2026-0069,TEST-CASE-2026-0012,resolution_proposal_generated,2026-04-22T15:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0012 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0070,TEST-CASE-2026-0012,human_approval_created,2026-04-22T17:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0009 requested for resolution_proposal TEST-RP-2026-0012.
+TEST-AUD-2026-0071,TEST-CASE-2026-0012,human_approval_approved,2026-04-22T22:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0009 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0072,TEST-CASE-2026-0013,customer_case_created,2026-04-24T10:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0013 created with type damaged_delivery and priority medium.
+TEST-AUD-2026-0073,TEST-CASE-2026-0014,customer_case_created,2026-04-24T11:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0014 created with type missing_item and priority high.
+TEST-AUD-2026-0074,TEST-CASE-2026-0013,attachment_added,2026-04-24T11:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0019 (damaged_item_photo) added to case TEST-CASE-2026-0013.
+TEST-AUD-2026-0075,TEST-CASE-2026-0014,attachment_added,2026-04-24T12:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0021 (proof_of_delivery) added to case TEST-CASE-2026-0014.
+TEST-AUD-2026-0076,TEST-CASE-2026-0012,customer_case_updated,2026-04-24T12:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0012 status updated to 'resolved'.
+TEST-AUD-2026-0077,TEST-CASE-2026-0013,attachment_added,2026-04-24T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0020 (outer_carton_photo) added to case TEST-CASE-2026-0013.
+TEST-AUD-2026-0078,TEST-CASE-2026-0013,resolution_proposal_generated,2026-04-24T16:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0013 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0079,TEST-CASE-2026-0014,resolution_proposal_generated,2026-04-24T17:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0014 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0080,TEST-CASE-2026-0013,recovery_draft_created,2026-04-24T20:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0007 created against carrier 'Packeta'.
+TEST-AUD-2026-0081,TEST-CASE-2026-0014,recovery_draft_created,2026-04-24T21:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0008 created against carrier 'GLS'.
+TEST-AUD-2026-0082,TEST-CASE-2026-0014,recovery_draft_updated,2026-04-25T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0008 updated to status 'sent'.
+TEST-AUD-2026-0083,TEST-CASE-2026-0013,customer_case_updated,2026-04-26T13:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0013 status updated to 'resolved'.
+TEST-AUD-2026-0084,TEST-CASE-2026-0016,customer_case_created,2026-05-05T13:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0016 created with type damaged_delivery and priority low.
+TEST-AUD-2026-0085,TEST-CASE-2026-0016,attachment_added,2026-05-05T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0024 (damaged_item_photo) added to case TEST-CASE-2026-0016.
+TEST-AUD-2026-0086,TEST-CASE-2026-0016,resolution_proposal_generated,2026-05-05T19:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0016 generated with recommendation 'Arrange Replacement Shipment'.
+TEST-AUD-2026-0087,TEST-CASE-2026-0016,human_approval_created,2026-05-05T21:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0011 requested for resolution_proposal TEST-RP-2026-0016.
+TEST-AUD-2026-0088,TEST-CASE-2026-0016,recovery_draft_created,2026-05-05T23:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0009 created against supplier 'Vistula Furniture Group'.
+TEST-AUD-2026-0089,TEST-CASE-2026-0016,human_approval_created,2026-05-06T01:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0012 requested for recovery_draft TEST-RD-2026-0009.
+TEST-AUD-2026-0090,TEST-CASE-2026-0016,human_approval_approved,2026-05-06T02:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0011 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0091,TEST-CASE-2026-0016,human_approval_approved,2026-05-06T06:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0012 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0092,TEST-CASE-2026-0015,customer_case_created,2026-05-06T12:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0015 created with type return_request and priority medium.
+TEST-AUD-2026-0093,TEST-CASE-2026-0015,attachment_added,2026-05-06T13:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0022 (invoice) added to case TEST-CASE-2026-0015.
+TEST-AUD-2026-0094,TEST-CASE-2026-0015,attachment_added,2026-05-06T16:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0023 (proof_of_delivery) added to case TEST-CASE-2026-0015.
+TEST-AUD-2026-0095,TEST-CASE-2026-0015,resolution_proposal_generated,2026-05-06T18:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0015 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0096,TEST-CASE-2026-0015,human_approval_created,2026-05-06T20:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0010 requested for resolution_proposal TEST-RP-2026-0015.
+TEST-AUD-2026-0097,TEST-CASE-2026-0017,customer_case_created,2026-05-13T14:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0017 created with type missing_item and priority high.
+TEST-AUD-2026-0098,TEST-CASE-2026-0017,attachment_added,2026-05-13T15:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0025 (proof_of_delivery) added to case TEST-CASE-2026-0017.
+TEST-AUD-2026-0099,TEST-CASE-2026-0017,attachment_added,2026-05-13T18:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0026 (shipping_label_photo) added to case TEST-CASE-2026-0017.
+TEST-AUD-2026-0100,TEST-CASE-2026-0017,resolution_proposal_generated,2026-05-13T20:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0017 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0101,TEST-CASE-2026-0017,recovery_draft_created,2026-05-14T00:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0010 created against carrier 'Packeta'.
+TEST-AUD-2026-0102,TEST-CASE-2026-0017,recovery_draft_updated,2026-05-14T08:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0010 updated to status 'approved'.
+TEST-AUD-2026-0103,TEST-CASE-2026-0017,customer_case_updated,2026-05-15T17:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0017 status updated to 'closed'.
+TEST-AUD-2026-0104,TEST-CASE-2026-0018,customer_case_created,2026-05-17T09:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0018 created with type wrong_item and priority medium.
+TEST-AUD-2026-0105,TEST-CASE-2026-0018,attachment_added,2026-05-17T10:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0027 (damaged_item_photo) added to case TEST-CASE-2026-0018.
+TEST-AUD-2026-0106,TEST-CASE-2026-0018,resolution_proposal_generated,2026-05-17T15:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0018 generated with recommendation 'Arrange Replacement Shipment'.
+TEST-AUD-2026-0107,TEST-CASE-2026-0018,human_approval_created,2026-05-17T17:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0013 requested for resolution_proposal TEST-RP-2026-0018.
+TEST-AUD-2026-0108,TEST-CASE-2026-0018,recovery_draft_created,2026-05-17T19:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0011 created against supplier 'Nordic Homeware Trading s.r.o.'.
+TEST-AUD-2026-0109,TEST-CASE-2026-0018,recovery_draft_updated,2026-05-18T03:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0011 updated to status 'sent'.
+TEST-AUD-2026-0110,TEST-CASE-2026-0019,customer_case_created,2026-06-02T10:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0019 created with type return_request and priority medium.
+TEST-AUD-2026-0111,TEST-CASE-2026-0019,attachment_added,2026-06-02T11:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0028 (invoice) added to case TEST-CASE-2026-0019.
+TEST-AUD-2026-0112,TEST-CASE-2026-0019,attachment_added,2026-06-02T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0029 (proof_of_delivery) added to case TEST-CASE-2026-0019.
+TEST-AUD-2026-0113,TEST-CASE-2026-0019,resolution_proposal_generated,2026-06-02T16:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0019 generated with recommendation 'Escalate for Manual Review'.
+TEST-AUD-2026-0114,TEST-CASE-2026-0020,customer_case_created,2026-06-06T11:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0020 created with type missing_item and priority high.
+TEST-AUD-2026-0115,TEST-CASE-2026-0020,attachment_added,2026-06-06T12:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0030 (proof_of_delivery) added to case TEST-CASE-2026-0020.
+TEST-AUD-2026-0116,TEST-CASE-2026-0020,resolution_proposal_generated,2026-06-06T17:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0020 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0117,TEST-CASE-2026-0020,human_approval_created,2026-06-06T19:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0015 requested for resolution_proposal TEST-RP-2026-0020.
+TEST-AUD-2026-0118,TEST-CASE-2026-0020,recovery_draft_created,2026-06-06T21:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0012 created against carrier 'GLS'.
+TEST-AUD-2026-0119,TEST-CASE-2026-0020,human_approval_created,2026-06-06T23:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0014 requested for recovery_draft TEST-RD-2026-0012.
+TEST-AUD-2026-0120,TEST-CASE-2026-0020,human_approval_rejected,2026-06-07T00:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0015 rejected by Test Manager – Jana Valentová.
+TEST-AUD-2026-0121,TEST-CASE-2026-0020,human_approval_approved,2026-06-07T04:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0014 approved by Test Manager – Elena Rybárová.
+TEST-AUD-2026-0122,TEST-CASE-2026-0020,customer_case_updated,2026-06-08T14:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0020 status updated to 'closed'.
+TEST-AUD-2026-0123,TEST-CASE-2026-0021,customer_case_created,2026-06-13T12:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0021 created with type wrong_item and priority medium.
+TEST-AUD-2026-0124,TEST-CASE-2026-0021,attachment_added,2026-06-13T13:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0031 (damaged_item_photo) added to case TEST-CASE-2026-0021.
+TEST-AUD-2026-0125,TEST-CASE-2026-0021,attachment_added,2026-06-13T16:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0032 (invoice) added to case TEST-CASE-2026-0021.
+TEST-AUD-2026-0126,TEST-CASE-2026-0021,resolution_proposal_generated,2026-06-13T18:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0021 generated with recommendation 'Arrange Replacement Shipment'.
+TEST-AUD-2026-0127,TEST-CASE-2026-0021,recovery_draft_created,2026-06-13T22:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0013 created against supplier 'BlueRiver Electronics a.s.'.
+TEST-AUD-2026-0128,TEST-CASE-2026-0021,human_approval_created,2026-06-14T00:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0016 requested for recovery_draft TEST-RD-2026-0013.
+TEST-AUD-2026-0129,TEST-CASE-2026-0021,human_approval_approved,2026-06-14T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0016 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0130,TEST-CASE-2026-0021,recovery_draft_updated,2026-06-14T06:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0013 updated to status 'rejected'.
+TEST-AUD-2026-0131,TEST-CASE-2026-0021,customer_case_updated,2026-06-15T15:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0021 status updated to 'resolved'.
+TEST-AUD-2026-0132,TEST-CASE-2026-0022,customer_case_created,2026-06-27T13:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0022 created with type missing_item and priority high.
+TEST-AUD-2026-0133,TEST-CASE-2026-0022,attachment_added,2026-06-27T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0033 (proof_of_delivery) added to case TEST-CASE-2026-0022.
+TEST-AUD-2026-0134,TEST-CASE-2026-0022,resolution_proposal_generated,2026-06-27T19:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0022 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0135,TEST-CASE-2026-0022,human_approval_created,2026-06-27T21:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0018 requested for resolution_proposal TEST-RP-2026-0022.
+TEST-AUD-2026-0136,TEST-CASE-2026-0022,recovery_draft_created,2026-06-27T23:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0014 created against carrier 'GLS'.
+TEST-AUD-2026-0137,TEST-CASE-2026-0022,human_approval_created,2026-06-28T01:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0017 requested for recovery_draft TEST-RD-2026-0014.
+TEST-AUD-2026-0138,TEST-CASE-2026-0022,recovery_draft_updated,2026-06-28T07:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0014 updated to status 'approved'.
+TEST-AUD-2026-0139,TEST-CASE-2026-0023,customer_case_created,2026-07-06T14:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0023 created with type missing_item and priority high.
+TEST-AUD-2026-0140,TEST-CASE-2026-0023,attachment_added,2026-07-06T15:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0034 (proof_of_delivery) added to case TEST-CASE-2026-0023.
+TEST-AUD-2026-0141,TEST-CASE-2026-0023,attachment_added,2026-07-06T18:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0035 (shipping_label_photo) added to case TEST-CASE-2026-0023.
+TEST-AUD-2026-0142,TEST-CASE-2026-0023,resolution_proposal_generated,2026-07-06T20:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0023 generated with recommendation 'Escalate for Manual Review'.
+TEST-AUD-2026-0143,TEST-CASE-2026-0023,human_approval_created,2026-07-06T22:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0019 requested for resolution_proposal TEST-RP-2026-0023.
+TEST-AUD-2026-0144,TEST-CASE-2026-0023,human_approval_approved,2026-07-07T03:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0019 approved by Test Manager – Boris Turčan.
+TEST-AUD-2026-0145,TEST-CASE-2026-0024,customer_case_created,2026-07-10T09:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0024 created with type return_request and priority low.
+TEST-AUD-2026-0146,TEST-CASE-2026-0024,attachment_added,2026-07-10T10:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0036 (invoice) added to case TEST-CASE-2026-0024.
+TEST-AUD-2026-0147,TEST-CASE-2026-0024,resolution_proposal_generated,2026-07-10T15:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0024 generated with recommendation 'Approve Standard Return'.
+TEST-AUD-2026-0148,TEST-CASE-2026-0024,human_approval_created,2026-07-10T17:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0020 requested for resolution_proposal TEST-RP-2026-0024.
+TEST-AUD-2026-0149,TEST-CASE-2026-0024,human_approval_approved,2026-07-10T22:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0020 approved by Test Manager – Jana Valentová.
+TEST-AUD-2026-0150,TEST-CASE-2026-0025,customer_case_created,2026-07-12T10:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0025 created with type wrong_item and priority medium.
+TEST-AUD-2026-0151,TEST-CASE-2026-0026,customer_case_created,2026-07-12T11:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0026 created with type missing_item and priority urgent.
+TEST-AUD-2026-0152,TEST-CASE-2026-0025,attachment_added,2026-07-12T11:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0037 (damaged_item_photo) added to case TEST-CASE-2026-0025.
+TEST-AUD-2026-0153,TEST-CASE-2026-0026,attachment_added,2026-07-12T12:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0039 (proof_of_delivery) added to case TEST-CASE-2026-0026.
+TEST-AUD-2026-0154,TEST-CASE-2026-0025,attachment_added,2026-07-12T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0038 (invoice) added to case TEST-CASE-2026-0025.
+TEST-AUD-2026-0155,TEST-CASE-2026-0025,resolution_proposal_generated,2026-07-12T16:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0025 generated with recommendation 'Issue Customer Refund'.
+TEST-AUD-2026-0156,TEST-CASE-2026-0026,resolution_proposal_generated,2026-07-12T17:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0026 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0157,TEST-CASE-2026-0025,human_approval_created,2026-07-12T18:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0021 requested for resolution_proposal TEST-RP-2026-0025.
+TEST-AUD-2026-0158,TEST-CASE-2026-0026,human_approval_created,2026-07-12T19:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0022 requested for resolution_proposal TEST-RP-2026-0026.
+TEST-AUD-2026-0159,TEST-CASE-2026-0025,recovery_draft_created,2026-07-12T20:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0015 created against supplier 'BlueRiver Electronics a.s.'.
+TEST-AUD-2026-0160,TEST-CASE-2026-0026,recovery_draft_created,2026-07-12T21:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0016 created against carrier 'GLS'.
+TEST-AUD-2026-0161,TEST-CASE-2026-0025,human_approval_approved,2026-07-12T23:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0021 approved by Test Manager – Elena Rybárová.
+TEST-AUD-2026-0162,TEST-CASE-2026-0026,human_approval_rejected,2026-07-13T00:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0022 rejected by Test Manager – Elena Rybárová.
+TEST-AUD-2026-0163,TEST-CASE-2026-0025,recovery_draft_updated,2026-07-13T04:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0015 updated to status 'rejected'.
+TEST-AUD-2026-0164,TEST-CASE-2026-0026,recovery_draft_updated,2026-07-13T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0016 updated to status 'approved'.
+TEST-AUD-2026-0165,TEST-CASE-2026-0026,customer_case_updated,2026-07-14T14:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0026 status updated to 'resolved'.
+TEST-AUD-2026-0166,TEST-CASE-2026-0028,customer_case_created,2026-07-21T13:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0028 created with type missing_item and priority high.
+TEST-AUD-2026-0167,TEST-CASE-2026-0028,attachment_added,2026-07-21T14:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0042 (proof_of_delivery) added to case TEST-CASE-2026-0028.
+TEST-AUD-2026-0168,TEST-CASE-2026-0028,resolution_proposal_generated,2026-07-21T19:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0028 generated with recommendation 'File Carrier Claim'.
+TEST-AUD-2026-0169,TEST-CASE-2026-0028,recovery_draft_created,2026-07-21T23:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0018 created against carrier 'GLS'.
+TEST-AUD-2026-0170,TEST-CASE-2026-0027,customer_case_created,2026-07-24T12:00:00Z,test_user,SYNTHETIC TEST DATA — Test case TEST-CASE-2026-0027 created with type damaged_delivery and priority medium.
+TEST-AUD-2026-0171,TEST-CASE-2026-0027,attachment_added,2026-07-24T13:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0040 (damaged_item_photo) added to case TEST-CASE-2026-0027.
+TEST-AUD-2026-0172,TEST-CASE-2026-0027,attachment_added,2026-07-24T16:00:00Z,test_user,SYNTHETIC TEST DATA — Attachment TEST-ATT-2026-0041 (outer_carton_photo) added to case TEST-CASE-2026-0027.
+TEST-AUD-2026-0173,TEST-CASE-2026-0027,resolution_proposal_generated,2026-07-24T18:00:00Z,system,SYNTHETIC TEST DATA — Resolution proposal TEST-RP-2026-0027 generated with recommendation 'Arrange Replacement Shipment'.
+TEST-AUD-2026-0174,TEST-CASE-2026-0027,human_approval_created,2026-07-24T20:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0024 requested for resolution_proposal TEST-RP-2026-0027.
+TEST-AUD-2026-0175,TEST-CASE-2026-0027,recovery_draft_created,2026-07-24T22:00:00Z,system,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0017 created against supplier 'Vistula Furniture Group'.
+TEST-AUD-2026-0176,TEST-CASE-2026-0027,human_approval_created,2026-07-25T00:00:00Z,system,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0023 requested for recovery_draft TEST-RD-2026-0017.
+TEST-AUD-2026-0177,TEST-CASE-2026-0027,human_approval_rejected,2026-07-25T05:00:00Z,test_manager,SYNTHETIC TEST DATA — Human approval TEST-APR-2026-0023 rejected by Test Manager – Boris Turčan.
+TEST-AUD-2026-0178,TEST-CASE-2026-0027,recovery_draft_updated,2026-07-25T06:00:00Z,test_manager,SYNTHETIC TEST DATA — Recovery draft TEST-RD-2026-0017 updated to status 'approved'.
+TEST-AUD-2026-0179,TEST-CASE-2026-0027,customer_case_updated,2026-07-26T15:00:00Z,test_manager,SYNTHETIC TEST DATA — Case TEST-CASE-2026-0027 status updated to 'resolved'.
