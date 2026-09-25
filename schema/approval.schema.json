@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/approval.schema.json",
   "title": "Approval",
-  "description": "Maps to the 'Human Approvals' entity in docs/claimflow-luo-playbook.md, Phase 1. The playbook's own Step 2.3 UI ('Approve Both & Dispatch', 'Edit Drafts', 'Reject / Escalate') maps onto this entity's decision values rather than adding new ones: Approve Both & Dispatch -> approved, Edit Drafts -> approved_with_edits, Reject / Escalate -> rejected (with escalation captured in notes/severity, not as a separate decision).",
+  "description": "Maps to the 'Human Approvals' entity in docs/claimflow-luo-playbook.md, Phase 1. The playbook's own Step 2.3 UI ('Approve Both & Dispatch', 'Edit Drafts', 'Reject / Escalate') maps onto this entity's decision values rather than adding new ones: Approve Both & Dispatch -> approved, Edit Drafts -> approved_with_edits, Reject / Escalate -> rejected (with escalation captured in notes/severity, not as a separate decision). NOTE: the playbook's Phase 1 prompt asked for a Timestamp field, but a live inspection of the Luo build (2026-09-25 migration inventory) found human_approval has no timestamp column at all - timestamp is kept here as the intended/target field but marked optional, not required, until the live implementation actually has it.",
   "type": "object",
-  "required": ["approvalId", "caseId", "actionType", "reviewerName", "decision", "timestamp"],
+  "required": ["approvalId", "caseId", "actionType", "reviewerName", "decision"],
   "properties": {
     "approvalId": { "type": "string" },
     "caseId": { "type": "string" },
