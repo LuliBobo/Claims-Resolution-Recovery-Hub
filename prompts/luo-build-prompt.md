@@ -1,32 +1,25 @@
-# Luo build prompt
+# Luo build prompt(s)
 
-Paste the block below into Luo in English, as-is. Source: `docs/concept.md`.
+**Primary source:** `docs/claimflow-luo-playbook.md`. Its Phase 1 "Master Initialization Prompt" is the exact prompt to paste first into Luo, and it is what the current live Luo build was actually seeded from (its Seed Scenario 1 — Elena Rostova, order #ORD-9842, DPD — matches the flagship case confirmed present in the live Luo database). Treat that document, not this file, as the canonical build sequence: Phase 1 (init) → Phase 2 (refinement prompts 2.1–2.3) → Phase 3 (seed scenarios 3.1–3.2) → Phase 4 (analytics) → Phase 5 (demo script).
 
----
+**Alternative, more granular source:** `docs/luo-modular-prompts.md` — 16 separate prompts, one module at a time, with richer per-field detail (e.g. Internal English Summary, Priority, Recovery Needed) than the playbook's leaner entity list. Use this if the playbook's single large Phase 1 prompt causes Luo to overbuild or misname fields, or if a module needs to be refined further than the playbook's phases cover — but note its exact field names don't match `schema/` 1:1 (see caveat below).
 
-Build an internal English-language application called "Claims Resolution & Recovery Hub". Its purpose is to help small and mid-sized e-commerce teams manage returns, damaged-goods complaints, warranty claims and recovery cases from one multilingual workspace. Create database entities for Customer Cases, Attachments, Orders, Shipments, Policy Documents, Rules, Resolution Proposals, Recovery Drafts, Human Approvals, Audit Events and Insight Records. Create a dashboard with open cases, cases waiting for evidence, cases waiting for approval, recovery opportunities, repeated issue categories and recent audit activity.
+## Schema alignment note
 
-Create an intake workflow for customer complaints received through form entry or manual inbox copy-paste. Each case should capture customer name, language, order reference, complaint text, attached images, date, sales channel and desired outcome if stated. Add AI-assisted classification to distinguish withdrawal, damaged delivery, defective product, wrong item, missing item and other complaint types. Show classification confidence and allow manual correction.
-
-Create an Order Lookup view that links the complaint to order details, shipment details, SKU, carrier and supplier. Add an Evidence Checker that identifies whether required items are present, such as product photo, outer packaging photo, invoice, delivery date or tracking number. If evidence is missing, show a checklist and generate a polite customer request for the missing materials.
-
-Add a Policy Retrieval module that searches uploaded internal PDF documents and rules to find the relevant complaint and recovery guidance. For every case, show the exact policy excerpt, source document and rule version supporting the recommendation. Create a Resolution Agent that recommends refund, replacement, partial credit, escalation or rejection. Create a multilingual Reply Draft module that prepares a customer reply in the customer's language and an internal English summary for the operator.
-
-Create a Recovery Agent that prepares a carrier or supplier recovery draft when relevant. The draft should include counterparty, claim type, linked order, linked evidence, damage summary, estimated recoverable amount and next action. Do not connect to any live courier or payment system. Mark the system clearly as "Prototype — human approval required before any external action."
-
-Create deterministic workflow routing using five scored factors from 0 to 3: evidence completeness, policy clarity, customer impact, business exposure and recovery potential. Apply prototype thresholds: 0–4 quick review; 5–7 request evidence or supervisor check; 8–10 human approval required; 11–15 escalate and block auto-closure. Show the factor breakdown in every case.
-
-Create visible AI roles for Intake Agent, Classification Agent, Policy Retrieval Agent, Resolution Agent and Recovery Agent. Add a Human Review inbox with Approve, Approve with edits, Request more evidence and Reject options. Record every recommendation, edit, approval and case-state change in an append-only audit timeline. Add an analytics page with repeated issue trends by SKU, carrier, warehouse and supplier. Include sample demo data for a damaged-vase case and a wrong-item case. Use a guided five-minute demo mode.
-
----
+`schema/*.json` in this repo now mirrors `docs/claimflow-luo-playbook.md`'s entity list exactly (10 entities — no separate "Rule" entity; rule content lives in Policy Documents' Content Summary). If you use `docs/luo-modular-prompts.md` instead or in addition, its field names (e.g. "Priority", "Assigned Reviewer", "Internal English Summary" as a stored Customer Case field) are additive extras beyond the playbook/schema baseline, not a replacement for it — add them as extra fields in Luo if wanted, but don't let them replace the canonical field names already listed in `schema/`.
 
 ## Seeding Luo with the prototype assets already in this repo
 
-When Luo asks for policy documents, rules or sample cases, use the files already prepared here instead of writing them from scratch inside Luo:
+When Luo asks for policy documents or sample cases, use the files already prepared here instead of writing them from scratch inside Luo:
 
-- Sample cases: `demo-data/cases/damaged-vase.json`, `demo-data/cases/wrong-item.json`
+- Sample cases (real seed data, matching what's already live in Luo): `demo-data/cases/damaged-vase.json` (Elena Rostova, #CAS-2026-089), `demo-data/cases/wrong-item.json` (Martin Horvath, #CAS-2026-090)
 - Policy excerpts: `demo-data/policy-documents/`
-- Decision thresholds: `rules/decision-rules.yaml`
+- Decision-routing overlay (five-factor scoring, optional on top of the base entities): `rules/decision-rules.yaml`
 - Reply templates: `i18n/reply-templates/`
 
-Keeping Luo's seed data in sync with these files means the demo data survives if the Luo workspace becomes unavailable.
+Keeping Luo's seed data in sync with these files means the demo data survives if the Luo workspace becomes unavailable. If you change something directly in Luo (e.g. via prompts in the playbook's Phase 3), mirror the change back into these JSON files so they don't drift apart again.
+
+## Known open items from the playbook itself
+
+- The playbook's own approval-gate wording (Step 2.3: "Approve Both & Dispatch" / "Edit Drafts" / "Reject / Escalate") doesn't exactly match its own Phase 1 `Human Approvals.Decision` field values (`Approved`, `Approved With Edits`, `Rejected`). `schema/approval.schema.json` documents the intended mapping between the two.
+- The playbook's Seed Scenario 2 (Martin Horvath / wrong item) explicitly has **no carrier claim** — it's an internal warehouse-discrepancy flag, not a Recovery Draft. Don't force-create a Recovery Draft record for that case.

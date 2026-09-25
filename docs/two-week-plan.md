@@ -19,4 +19,6 @@ Tracks the plan from `docs/concept.md`. Check items off as they're done in Luo (
 
 ## Recommended build order inside Luo
 
-Build only the **damaged-vase complaint story** first (`demo-data/cases/damaged-vase.json`). Once the full path — intake, classify, verify evidence, retrieve policy, propose replacement, draft carrier recovery, approve, record — works end to end, add the **wrong-item** story (`demo-data/cases/wrong-item.json`).
+Follow `docs/claimflow-luo-playbook.md` Phase 1 → 5 as the canonical sequence (this is what the live Luo build was actually seeded from). Build only the **damaged-vase complaint story** first (`demo-data/cases/damaged-vase.json`, Elena Rostova / DPD, English). Once the full path — intake, classify, verify evidence, retrieve policy, propose replacement, draft carrier recovery, approve, record — works end to end, add the **wrong-item** story (`demo-data/cases/wrong-item.json`, Martin Horvath, Slovak — no carrier claim, internal warehouse flag only).
+
+`docs/luo-modular-prompts.md` is a more granular 16-step alternative if a single Phase-1 prompt overbuilds or misnames fields in Luo.

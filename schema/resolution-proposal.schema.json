@@ -2,44 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/resolution-proposal.schema.json",
   "title": "ResolutionProposal",
+  "description": "Maps to the 'Resolution Proposals' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["id", "caseId", "recommendation", "rationale"],
+  "required": ["proposalId", "caseId", "recommendedAction", "rationale"],
   "properties": {
-    "id": { "type": "string" },
+    "proposalId": { "type": "string" },
     "caseId": { "type": "string" },
-    "recommendation": { "type": "string", "enum": ["refund", "replacement", "partial_credit", "escalation", "rejection"] },
+    "recommendedAction": { "type": "string", "enum": ["replacement", "refund", "store_credit", "reject"] },
     "rationale": { "type": "string" },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-    "valueImpact": { "type": "number", "description": "Estimated monetary impact, in the merchant's base currency" },
-    "factorScores": {
-      "type": "object",
-      "properties": {
-        "evidenceCompleteness": { "type": "integer", "minimum": 0, "maximum": 3 },
-        "policyClarity": { "type": "integer", "minimum": 0, "maximum": 3 },
-        "customerImpact": { "type": "integer", "minimum": 0, "maximum": 3 },
-        "businessExposure": { "type": "integer", "minimum": 0, "maximum": 3 },
-        "recoveryPotential": { "type": "integer", "minimum": 0, "maximum": 3 }
-      }
-    },
-    "workflowPath": {
-      "type": "string",
-      "enum": ["quick_review", "evidence_or_supervisor_check", "human_approval_required", "escalate_block_auto_closure"]
-    },
-    "policySource": {
-      "type": "object",
-      "properties": {
-        "documentName": { "type": "string" },
-        "excerpt": { "type": "string" },
-        "ruleVersion": { "type": "string" }
-      }
-    },
-    "customerReplyDraft": {
-      "type": "object",
-      "properties": {
-        "language": { "type": "string" },
-        "text": { "type": "string" },
-        "internalSummaryEn": { "type": "string" }
-      }
-    }
+    "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "estimatedCost": { "type": "number" }
   }
 }

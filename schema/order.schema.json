@@ -2,16 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/order.schema.json",
   "title": "Order",
+  "description": "Maps to the 'Orders' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["orderId", "date", "sku", "quantity", "salesChannel"],
+  "required": ["orderId", "orderDate", "sku", "productName"],
   "properties": {
     "orderId": { "type": "string" },
-    "date": { "type": "string", "format": "date" },
+    "orderDate": { "type": "string", "format": "date" },
     "sku": { "type": "string" },
-    "quantity": { "type": "integer", "minimum": 1 },
+    "productName": { "type": "string" },
+    "itemValue": { "type": "number" },
+    "currency": { "type": "string" },
     "salesChannel": { "type": "string" },
-    "paymentStatus": { "type": "string", "enum": ["paid", "refunded", "partially_refunded", "pending"] },
-    "supplierId": { "type": "string" },
-    "shipmentId": { "type": "string" }
+    "customerId": { "type": "string" }
   }
 }

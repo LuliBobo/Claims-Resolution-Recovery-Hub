@@ -1,5 +1,7 @@
 # Architecture — multi-agent design
 
+> The entity/field schema below follows `docs/claimflow-luo-playbook.md` (the document the live Luo build was actually seeded from). The five named agent roles are a narrative/positioning layer from `docs/concept.md` and `docs/concept-sharpened.md` — Luo does not persist them as separate database records, they describe how the workflow is explained to users and judges.
+
 ## Agent roles
 
 | Agent | Responsibility |
@@ -17,16 +19,16 @@ Agents recommend and assemble information. **Deterministic workflow rules decide
 ```
 Complaint (email/form + photos)
   -> Intake Agent            captures CustomerCase + Attachments
-  -> Classification Agent    sets caseType + classificationConfidence
+  -> Classification Agent    sets caseType + severity
   -> Order Lookup            links Order + Shipment
-  -> Evidence Checker        compares Attachments against Rule.evidenceRequirement
+  -> Evidence Checker        compares Attachments against the case type's evidence requirement
        |-- missing evidence -> customer evidence request, case stays "awaiting_evidence"
-  -> Policy Retrieval Agent  finds matching Rule + PolicyDocument excerpt
-  -> Resolution Agent        creates ResolutionProposal (with factorScores + workflowPath)
-  -> Recovery Agent          creates RecoveryDraft, if recovery-eligible
-  -> Human Review            records Approval (approve / approve_with_edits / request_more_evidence / reject)
+  -> Policy Retrieval Agent  finds matching PolicyDocument excerpt
+  -> Resolution Agent        creates ResolutionProposal (recommendedAction + rationale + confidenceScore)
+  -> Recovery Agent          creates RecoveryDraft, if recovery-eligible (not every case needs one - see wrong-item.json)
+  -> Human Review            records Approval (approved / approved_with_edits / rejected)
   -> Audit Event             append-only log of every state change
-  -> Ops Analytics           aggregates into InsightRecord (SKU/carrier/supplier trends)
+  -> Ops Analytics           aggregates into InsightRecord (SKU/carrier trends)
 ```
 
 ## Workflow routing (deterministic, not model-controlled)
@@ -44,7 +46,7 @@ Every ResolutionProposal must display: the five factor scores, the policy source
 
 ## Data model
 
-Entities and required fields are defined as JSON Schema in `schema/`: `customer-case`, `attachment`, `order`, `shipment`, `policy-document`, `rule`, `resolution-proposal`, `recovery-draft`, `approval`, `audit-event`, `insight-record`.
+Entities and required fields are defined as JSON Schema in `schema/`, matching `docs/claimflow-luo-playbook.md`'s 10 entities exactly: `customer-case`, `attachment`, `order`, `shipment`, `policy-document`, `resolution-proposal`, `recovery-draft`, `approval`, `audit-event`, `insight-record`. There is no separate `rule` entity — rule text lives in `policy-document.contentSummary`.
 
 ## Guardrails
 

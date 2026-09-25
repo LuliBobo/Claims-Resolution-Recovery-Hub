@@ -2,17 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/audit-event.schema.json",
   "title": "AuditEvent",
+  "description": "Maps to the 'Audit Events' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["id", "caseId", "actor", "event", "timestamp"],
+  "required": ["eventId", "caseId", "eventType", "actor", "timestamp"],
   "properties": {
-    "id": { "type": "string" },
+    "eventId": { "type": "string" },
     "caseId": { "type": "string" },
-    "actor": { "type": "string", "description": "Agent name or human reviewer identifier" },
-    "event": { "type": "string" },
-    "beforeState": { "type": "object" },
-    "afterState": { "type": "object" },
-    "linkedRule": { "type": "string" },
-    "outcome": { "type": "string" },
+    "eventType": { "type": "string" },
+    "actor": { "type": "string" },
+    "description": { "type": "string" },
     "timestamp": { "type": "string", "format": "date-time" }
   }
 }

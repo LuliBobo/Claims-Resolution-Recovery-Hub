@@ -1,5 +1,7 @@
 # Pitch
 
+Full spoken-pitch variants (2.5 min / 60 sec / 20 sec, opening/closing lines): `docs/spoken-pitch.md`. Full screen-by-screen demo script: `docs/demo-script.md`. Both use the real flagship case (Elena Rostova, English, DPD damage claim) actually seeded in Luo per `docs/claimflow-luo-playbook.md`.
+
 ## Tagline
 
 **Resolve faster. Recover more. Keep humans in control.**

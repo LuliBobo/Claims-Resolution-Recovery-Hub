@@ -4,8 +4,15 @@
 # These thresholds are not legal or regulatory standards and must not be
 # presented to end users as such. No language model may silently override
 # the workflow rule these scores select.
+#
+# This is a cross-cutting overlay on top of the entity schema in schema/,
+# which follows docs/claimflow-luo-playbook.md. The playbook's own database
+# entities (Resolution Proposals, Human Approvals) don't store this five-factor
+# breakdown directly - it is meant to be computed/displayed alongside them
+# (see docs/claimflow-luo-playbook.md Step 2.1 evidence checklist and
+# docs/luo-modular-prompts.md Prompt 12 for how to wire it into Luo).
 
-version: "0.1.0"
+version: "0.2.0"
 
 factors:
   - id: evidence_completeness
@@ -64,23 +71,27 @@ display_requirements:
   - "Every recommendation must cite the policy source (document + excerpt + rule version) it relied on."
   - "Every recommendation must list missing information, if any."
 
+# Matches CustomerCase.caseType in schema/customer-case.schema.json.
 case_types:
-  - withdrawal
   - damaged_delivery
-  - defective_product
   - wrong_item
   - missing_item
+  - defective_product
+  - return_request
   - other
 
+# Matches ResolutionProposal.recommendedAction in schema/resolution-proposal.schema.json.
 resolution_options:
-  - refund
   - replacement
-  - partial_credit
-  - escalation
-  - rejection
+  - refund
+  - store_credit
+  - reject
 
-recovery_claim_types:
-  - carrier_damage_claim
-  - carrier_loss_claim
-  - supplier_defect_claim
-  - supplier_shortage_claim
+# RecoveryDraft.claimReason (schema/recovery-draft.schema.json) is free text in the
+# playbook, not a fixed enum. These are example values only, for prompt-writing
+# and demo-data consistency, not a schema constraint.
+example_claim_reasons:
+  - "Shipping damage - carrier claim"
+  - "Item lost in transit - carrier claim"
+  - "Defective product - supplier claim"
+  - "Shortage / missing item - supplier claim"

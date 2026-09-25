@@ -1,6 +1,6 @@
 # Product requirements — Claims Resolution & Recovery Hub
 
-Source concept: `docs/concept.md`. This document restates it as buildable requirements; the concept doc remains the reference for rationale and market framing.
+Source concept: `docs/concept.md` (rationale/market framing) and `docs/claimflow-luo-playbook.md` (the actual build sequence and entity schema the live Luo app was seeded from — `schema/` follows it exactly). The flagship demo case is Elena Rostova / order #ORD-9842 / DPD, in English; see `docs/demo-script.md` and `docs/spoken-pitch.md` for the adapted, English-language pitch/demo assets actually used.
 
 ## One-line pitch
 
@@ -35,17 +35,19 @@ Full entity list and required fields: `schema/*.schema.json`. Workflow scoring a
 
 ## Five-minute demo script
 
-1. Receive a complaint: customer reports a broken glass vase with two photos.
+Full screen-by-screen script: `docs/demo-script.md`. Summary:
+
+1. Receive a complaint: Elena Rostova reports a shattered glass vase (order #ORD-9842, DPD) with one photo.
 2. Identify the order: hub links the complaint to order, SKU, carrier and delivery date.
-3. Classify the case: labelled as shipping damage.
-4. Check evidence completeness: outer-box photo missing, flagged.
-5. Retrieve the policy: Policy Retrieval Agent surfaces the relevant excerpt from the merchant's complaint guide and carrier claim rules.
-6. Recommend the customer resolution: Resolution Agent proposes a replacement with a reply draft in the customer's language.
-7. Generate recovery action: Recovery Agent prepares a carrier-claim package (order data, evidence references, damage summary).
+3. Classify the case: labelled as damaged delivery.
+4. Check evidence completeness: outer-box and shipping-label photos missing, flagged (DPD requires them within 48 hours).
+5. Retrieve the policy: Policy Retrieval surfaces the relevant excerpt from the merchant's complaint guide and DPD carrier claim rules.
+6. Recommend the customer resolution: Resolution Agent proposes a replacement with a reply draft.
+7. Generate recovery action: Recovery Agent prepares a carrier-claim package (order data, evidence references, damage summary) for DPD.
 8. Require human approval: reviewer approves the reply and the claim, outcome recorded.
 9. Show prevention insight: analytics view shows repeated damage for the same SKU/carrier route.
 
-Demo data for this script: `demo-data/cases/damaged-vase.json`. Second story (wrong-item): `demo-data/cases/wrong-item.json`.
+Demo data for this script: `demo-data/cases/damaged-vase.json`. Second story (wrong-item, Slovak, demonstrates multilingual reply drafting): `demo-data/cases/wrong-item.json`.
 
 ## Non-goals for the MVP
 

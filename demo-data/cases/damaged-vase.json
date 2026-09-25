@@ -1,96 +1,80 @@
 {
+  "_source": "Seed Scenario 1 in docs/claimflow-luo-playbook.md, Step 3.1 — this is the flagship demo case actually built in Luo.",
   "case": {
-    "id": "case-001",
-    "source": "email",
-    "language": "sk",
-    "customer": { "name": "Zuzana Kovalčíková", "email": "zuzana.k@example.com" },
-    "orderReference": "ORD-48213",
-    "complaintText": "Dobrý deň, sklenená váza, ktorú som si objednala, prišla rozbitá. Posielam fotky.",
-    "salesChannel": "webshop",
-    "desiredOutcome": "replacement",
+    "caseId": "#CAS-2026-089",
+    "customerName": "Elena Rostova",
+    "email": "elena.rostova@example.com",
+    "language": "en",
+    "orderReference": "#ORD-9842",
+    "channel": "webshop",
     "status": "awaiting_evidence",
     "caseType": "damaged_delivery",
-    "classificationConfidence": 0.93,
-    "createdAt": "2026-09-10T08:15:00Z",
-    "updatedAt": "2026-09-10T08:20:00Z",
-    "attachmentIds": ["att-001"],
-    "resolutionProposalId": "res-001",
-    "recoveryDraftId": "rec-001"
+    "severity": "high",
+    "createdAt": "2026-09-24T09:10:00Z"
   },
   "order": {
-    "orderId": "ORD-48213",
-    "date": "2026-09-05",
-    "sku": "VASE-GLASS-30CM",
-    "quantity": 1,
-    "salesChannel": "webshop",
-    "paymentStatus": "paid",
-    "supplierId": "SUP-GLASSCO",
-    "shipmentId": "SHP-77219"
+    "orderId": "#ORD-9842",
+    "orderDate": "2026-09-18",
+    "sku": "HOME-VASE-GL-01",
+    "productName": "Handmade Venetian Glass Vase",
+    "itemValue": 89.00,
+    "currency": "EUR",
+    "salesChannel": "webshop"
   },
   "shipment": {
-    "carrier": "NordicShip",
-    "trackingId": "NS7742190SK",
-    "deliveryDate": "2026-09-08",
-    "route": "Bratislava depot -> local delivery",
-    "warehouse": "WH-BA-01"
+    "shipmentId": "SHP-DPD-8492019482",
+    "orderId": "#ORD-9842",
+    "carrier": "DPD",
+    "trackingNumber": "DPD-SK-8492019482",
+    "deliveryDate": "2026-09-23",
+    "deliveryStatus": "delivered"
   },
   "attachments": [
     {
-      "id": "att-001",
-      "caseId": "case-001",
-      "fileType": "image",
-      "imageCategory": "product_photo",
-      "confidence": 0.97,
-      "extractedNotes": "Vase visibly shattered, image shows broken glass inside partial packaging.",
+      "attachmentId": "ATT-089-1",
+      "caseId": "#CAS-2026-089",
       "fileName": "vase-broken-1.jpg",
-      "uploadedAt": "2026-09-10T08:16:00Z"
+      "imageCategory": "product",
+      "status": "uploaded"
     }
   ],
+  "complaintText": "Hello, I just opened the parcel delivered by DPD yesterday. The vase is completely shattered into pieces! This was supposed to be a birthday gift for tomorrow. Please help immediately.",
   "evidenceCheck": {
-    "required": ["product_photo", "outer_packaging_photo"],
-    "present": ["product_photo"],
-    "missing": ["outer_packaging_photo"],
+    "required": ["product", "packaging", "shipping_label"],
+    "present": ["product"],
+    "missing": ["packaging", "shipping_label"],
+    "note": "DPD requires the outer-box and shipping-label photos within 48 hours of delivery to keep the damage claim active (see demo-data/policy-documents/carrier-claim-rules.md).",
     "generatedCustomerRequest": {
-      "language": "sk",
-      "text": "Ďakujeme za nahlásenie a fotografiu poškodenej vázy. Aby sme mohli prípad rýchlo vybaviť, prosíme vás ešte o fotografiu vonkajšieho obalu (kartónovej škatule), v akom balík dorazil. Stačí jedna fotografia, ktorá ukazuje stav krabice."
+      "language": "en",
+      "text": "We're very sorry the vase arrived shattered. To file the carrier claim in time, could you also send a photo of the outer shipping box and a photo of the shipping label? One photo of each is enough, and time is short — DPD requires this evidence within 48 hours of delivery."
     }
   },
   "resolutionProposal": {
-    "id": "res-001",
-    "caseId": "case-001",
-    "recommendation": "replacement",
-    "rationale": "Fragile-goods category with confirmed damage photo; policy allows immediate replacement pending stock once evidence is complete (Complaint Guide 3.2). Outer-packaging photo still missing.",
-    "confidence": 0.8,
-    "valueImpact": -34.9,
-    "factorScores": {
-      "evidenceCompleteness": 2,
-      "policyClarity": 0,
-      "customerImpact": 1,
-      "businessExposure": 1,
-      "recoveryPotential": 2
-    },
-    "workflowPath": "evidence_or_supervisor_check",
+    "proposalId": "PROP-089-1",
+    "caseId": "#CAS-2026-089",
+    "recommendedAction": "replacement",
+    "rationale": "Fragile-goods category (glass) with a confirmed damage photo; policy allows immediate replacement pending stock, without waiting for the carrier claim outcome (Complaint Guide 3.2). Outer-box and shipping-label photos are still missing and needed within DPD's 48-hour evidence window.",
+    "confidenceScore": 0.8,
+    "estimatedCost": 89.00,
     "policySource": {
-      "documentName": "Merchant Complaint Guide",
+      "documentTitle": "Merchant Complaint Guide",
       "excerpt": "3.2 For fragile-goods categories (glass, ceramics), a confirmed shipping-damage complaint with complete evidence is eligible for immediate replacement, pending stock availability, without waiting for the carrier claim outcome.",
-      "ruleVersion": "v1.2"
+      "version": "v1.2"
     },
     "customerReplyDraft": {
-      "language": "sk",
-      "text": "Je nám ľúto, že váza dorazila poškodená. Po doručení fotografie vonkajšieho obalu vám obratom pošleme náhradný kus.",
-      "internalSummaryEn": "Fragile-goods damage claim, product photo received, outer-packaging photo requested. Replacement recommended once evidence is complete."
+      "language": "en",
+      "text": "We're sorry the vase arrived broken. We're sending a replacement via priority courier as soon as we have the outer-box and shipping-label photos for the carrier claim.",
+      "internalSummaryEn": "Fragile-goods damage claim, product photo received, box + label photos requested within DPD's 48-hour window. Replacement recommended once evidence is complete."
     }
   },
   "recoveryDraft": {
-    "id": "rec-001",
-    "caseId": "case-001",
-    "counterparty": "NordicShip",
-    "claimType": "carrier_damage_claim",
-    "evidenceLinks": ["att-001"],
-    "damageSummary": "Glass vase (SKU VASE-GLASS-30CM) received shattered. Outer-packaging photo pending from customer before claim submission.",
-    "estimatedRecoverableAmount": 34.9,
+    "recoveryId": "REC-089-1",
+    "caseId": "#CAS-2026-089",
+    "counterpartyType": "carrier",
+    "counterpartyName": "DPD",
+    "claimReason": "Shipping damage - glass vase (SKU HOME-VASE-GL-01) received shattered.",
+    "estimatedRecoverableAmount": 89.00,
     "currency": "EUR",
-    "nextAction": "Await outer-packaging photo, then submit claim within NordicShip's 14-day window (delivered 2026-09-08).",
     "status": "draft"
   }
 }

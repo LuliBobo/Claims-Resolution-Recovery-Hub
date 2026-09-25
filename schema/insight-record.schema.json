@@ -2,19 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/insight-record.schema.json",
   "title": "InsightRecord",
+  "description": "Maps to the 'Insight Records' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["sku", "issueType", "frequency"],
+  "required": ["recordId", "sku", "issueType", "frequency"],
   "properties": {
+    "recordId": { "type": "string" },
     "sku": { "type": "string" },
-    "supplierId": { "type": "string" },
-    "carrier": { "type": "string" },
-    "warehouse": { "type": "string" },
-    "issueType": {
-      "type": "string",
-      "enum": ["withdrawal", "damaged_delivery", "defective_product", "wrong_item", "missing_item", "other"]
-    },
+    "productName": { "type": "string" },
+    "carrierName": { "type": "string" },
+    "issueType": { "type": "string" },
     "frequency": { "type": "integer", "minimum": 0 },
-    "periodStart": { "type": "string", "format": "date" },
-    "periodEnd": { "type": "string", "format": "date" }
+    "totalLossAmount": { "type": "number" }
   }
 }

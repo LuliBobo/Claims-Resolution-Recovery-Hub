@@ -2,13 +2,15 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/shipment.schema.json",
   "title": "Shipment",
+  "description": "Maps to the 'Shipments' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["carrier", "trackingId", "deliveryDate"],
+  "required": ["shipmentId", "orderId", "carrier"],
   "properties": {
-    "carrier": { "type": "string" },
-    "trackingId": { "type": "string" },
+    "shipmentId": { "type": "string" },
+    "orderId": { "type": "string" },
+    "carrier": { "type": "string", "enum": ["DPD", "Packeta", "DHL", "GLS"] },
+    "trackingNumber": { "type": "string" },
     "deliveryDate": { "type": "string", "format": "date" },
-    "route": { "type": "string" },
-    "warehouse": { "type": "string" }
+    "deliveryStatus": { "type": "string" }
   }
 }

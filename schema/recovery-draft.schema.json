@@ -2,21 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/recovery-draft.schema.json",
   "title": "RecoveryDraft",
+  "description": "Maps to the 'Recovery Drafts' entity in docs/claimflow-luo-playbook.md, Phase 1.",
   "type": "object",
-  "required": ["id", "caseId", "counterparty", "claimType", "status"],
+  "required": ["recoveryId", "caseId", "counterpartyType", "counterpartyName", "status"],
   "properties": {
-    "id": { "type": "string" },
+    "recoveryId": { "type": "string" },
     "caseId": { "type": "string" },
-    "counterparty": { "type": "string", "description": "Carrier or supplier name" },
-    "claimType": {
-      "type": "string",
-      "enum": ["carrier_damage_claim", "carrier_loss_claim", "supplier_defect_claim", "supplier_shortage_claim"]
-    },
-    "evidenceLinks": { "type": "array", "items": { "type": "string" }, "description": "Attachment.id references" },
-    "damageSummary": { "type": "string" },
+    "counterpartyType": { "type": "string", "enum": ["carrier", "supplier"] },
+    "counterpartyName": { "type": "string" },
+    "claimReason": { "type": "string" },
     "estimatedRecoverableAmount": { "type": "number" },
     "currency": { "type": "string" },
-    "nextAction": { "type": "string" },
-    "status": { "type": "string", "enum": ["draft", "approved", "submitted_manually", "rejected"] }
+    "status": { "type": "string", "enum": ["draft", "pending_review", "submitted", "recovered"] }
   }
 }

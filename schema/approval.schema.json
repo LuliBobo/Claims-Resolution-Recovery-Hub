@@ -2,15 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://claims-resolution-recovery-hub/schema/approval.schema.json",
   "title": "Approval",
+  "description": "Maps to the 'Human Approvals' entity in docs/claimflow-luo-playbook.md, Phase 1. The playbook's own Step 2.3 UI ('Approve Both & Dispatch', 'Edit Drafts', 'Reject / Escalate') maps onto this entity's decision values rather than adding new ones: Approve Both & Dispatch -> approved, Edit Drafts -> approved_with_edits, Reject / Escalate -> rejected (with escalation captured in notes/severity, not as a separate decision).",
   "type": "object",
-  "required": ["id", "caseId", "action", "reviewer", "decision", "timestamp"],
+  "required": ["approvalId", "caseId", "actionType", "reviewerName", "decision", "timestamp"],
   "properties": {
-    "id": { "type": "string" },
+    "approvalId": { "type": "string" },
     "caseId": { "type": "string" },
-    "action": { "type": "string", "description": "Exact action being approved, e.g. customer_reply, recovery_claim" },
-    "reviewer": { "type": "string" },
-    "decision": { "type": "string", "enum": ["approve", "approve_with_edits", "request_more_evidence", "reject"] },
-    "comment": { "type": "string" },
+    "actionType": { "type": "string", "description": "e.g. customer_reply, recovery_claim, both" },
+    "reviewerName": { "type": "string" },
+    "decision": { "type": "string", "enum": ["approved", "approved_with_edits", "rejected"] },
+    "notes": { "type": "string" },
     "timestamp": { "type": "string", "format": "date-time" }
   }
 }
