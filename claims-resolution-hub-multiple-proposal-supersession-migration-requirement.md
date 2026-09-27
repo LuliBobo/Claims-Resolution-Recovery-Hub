@@ -2,6 +2,8 @@
 
 **Status: PLANNING ONLY** — nothing in this document has been built. No spec edits, schema changes, data writes, approvals, sends, or builds have been performed as part of this investigation. This document exists to hand off a fully-scoped requirement to whoever implements it next (including a coding agent). Treat every item under "Proposed Design (Unbuilt)" as a design to be validated, not a description of current behaviour.
 
+**Addendum (2026-09-26/27):** the bug described in Part A was independently reproduced on a second, freshly-created case (`95382638-8a8f-42eb-8f12-5f72fa24b24b`, synthetic "QA E2E Test Customer") built specifically to verify the core claim workflow end to end. `regenerateResolutionProposal` created a second live proposal/approval pair on this case's very first regeneration call, identical in shape to the original 4-proposal case below. **This confirms the bug is systemic and reproduces immediately on any case, not an artifact specific to the original case's repeated-testing history.** Everything else in this document is unchanged by that finding; see `Migration/migration_handoff_public_02_business_rules_and_workflows.md` for two further, distinct evidence-handling bugs found during the same test run (unrelated to proposal supersession).
+
 ## Part A — Verified Current Behaviour (as of this writing, live build)
 
 Confirmed by direct read-only inspection (`query_spec`, SELECT-only SQL) of the Claims Resolution & Recovery Hub feature set.

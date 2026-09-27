@@ -43,6 +43,35 @@ policy document:
   generation logic, not by ID or a dedicated flag. Renaming that policy document on a target
   system would silently disable the gate unless the matching logic is updated too.
 
+### Corrections from live E2E verification (2026-09-26/27)
+
+Running a real end-to-end test surfaced two defects in the description above that were only
+discovered by executing the flow, not by reading the spec text:
+
+1. **"Present" is not the same as "sufficient," and the functions disagreed on which one they
+   meant.** Each attachment carries its own `evidence_status`
+   (`pending_review`/`sufficient`/`insufficient`/`not_applicable`), separate from the case-level
+   completeness booleans above. Case creation and proposal (re)generation originally treated any
+   non-`not_applicable` status as "present" — but the mark-as-sent gate independently required
+   `evidence_status == 'sufficient'` specifically. Result: a case could show all three booleans
+   `true` (and the recommendation would read as if evidence were complete) while mark-as-sent
+   still refused, because the two code paths used different definitions of "present." **Fixed
+   live**: all functions now consistently require `evidence_status == 'sufficient'`. Migration
+   takeaway: don't trust a spec's "reuses the same rules as X" cross-reference between functions —
+   each function's actual generated/implemented behavior needs independent verification, since one
+   of these diverged from its own stated intent even after the fix was first believed complete.
+2. **No sufficiency criteria were ever defined per evidence category, and the default judgment
+   bar cannot be met by every category.** The AI step that sets `evidence_status` applied a single
+   "does this depict damage?" test uniformly to all three required photo types — which a shipping
+   label can never satisfy, since it documents the shipment, not the item's condition. A live test
+   with a real, legible shipping-label image confirmed it was rejected as `insufficient` for
+   exactly this reason. As found, **no damaged-delivery case could ever reach `evidenceComplete:
+   true` through genuine AI judgment** — this is not a demo-data artifact, it's a structural gap.
+   A fix (explicit, category-specific sufficiency criteria — e.g. shipping label: legible with
+   visible carrier/tracking info, not damage depiction) was proposed but not yet built as of the
+   last session. **Migration takeaway: define sufficiency criteria per evidence category
+   explicitly from the start; never reuse one category's pass/fail bar for another.**
+
 ## Approval workflow
 1. A reviewer sees every pending Human Approval in a dedicated queue.
 2. Approving/rejecting sets the decision, reviewer, optional comment, and a decision timestamp.
