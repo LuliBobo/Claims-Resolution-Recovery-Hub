@@ -18,12 +18,13 @@ plan). This is what actually happened when it was run live in Luo, against a fre
 | Send-before-approval correctly refused | ✅ |
 | Both approvals succeed | ✅ |
 | `actionResolutionProposal` succeeds once approved | ✅ |
-| `sendRecoveryDraft` succeeds once evidence complete + approved | ⏸ **Not yet reached** — blocked by Bug #3 below at session handoff |
+| `sendRecoveryDraft` succeeds once evidence complete + approved | ✅ Succeeded 2026-09-28T04:17:03Z, after the Bug #3 fix |
 
-**No fully-closed happy path (evidence-complete → approved → successfully sent) has been
-demonstrated in this workspace yet.** Two real bugs blocked it in sequence; a third was found and
-fixed along the way. See `Migration/migration_handoff_public_02_business_rules_and_workflows.md`
-for the corrected canonical business-rule description these findings feed into.
+**Full happy path demonstrated, 2026-09-28.** Case → evidence → approve → resolution proposal
+sent → recovery draft sent, end to end, for the first time in this workspace. Three real bugs were
+found along the way (two fixed live, one deliberately deferred) — see below. See
+`Migration/migration_handoff_public_02_business_rules_and_workflows.md` for the corrected
+canonical business-rule description these findings feed into.
 
 ## Bugs found
 
@@ -38,8 +39,12 @@ for the corrected canonical business-rule description these findings feed into.
 3. **Shipping-label sufficiency structurally unreachable** — workspace-wide, not case-specific,
    and arguably the most severe: no `damaged_delivery` case could ever pass the evidence gate
    through genuine AI judgment, since the judgment step applied a "does this show damage?" bar to
-   a category that can never show damage. **Found and diagnosed; fix proposed but not yet built**
-   — session was interrupted by Luo's daily quota before the fix diff was reviewed.
+   a category that can never show damage. **Fixed and built live** (spec v16): sufficiency
+   criteria are now category-specific — legibility + shipment-identifying info for
+   `shipping_label`, damage/condition depiction for `photo_evidence`, relevance+legibility for
+   `invoice`/`correspondence`/`other`. Verified end-to-end: a fresh upload after the fix was
+   judged `sufficient`, independently confirmed (different attachment id, post-fix timestamp, no
+   duplicate) rather than taken on faith.
 
 ## Lessons for future test execution (and for the Claude Code rebuild's own test suite)
 
@@ -58,12 +63,16 @@ for the corrected canonical business-rule description these findings feed into.
   reliable — verify each function's actual behavior independently rather than trusting shared
   wording, even right after a fix that was believed to cover all of them.
 
-## State at handoff (for resuming)
+## Final state (case `95382638…`, closed out 2026-09-28)
 
 - Resolution proposal `1631f2b4…`: `status: sent`.
-- Recovery draft `210131c5…`: `status: approved`, `sent_at: null` — blocked only by Bug #3.
-- Stale original proposal `f72cdfb1…` / approval `666f9cee…`: untouched, preserved as a repro
-  instance for Bug #1.
-- Next action: get the Bug #3 fix diff reviewed and built, re-verify `evidenceComplete: true`,
-  then retry `sendRecoveryDraft` on `210131c5…` (already approved, no re-approval needed) — this
-  would be the first fully closed happy path demonstrated in this workspace.
+- Recovery draft `210131c5…`: `status: sent`, `sent_at: 2026-09-28T04:17:03Z` — Counterparty DPD,
+  €45.00, tracking `E2E-TEST-TRACK-0001`.
+- Stale original proposal `f72cdfb1…` / approval `666f9cee…`: still untouched, deliberately
+  preserved as a live repro instance for Bug #1 (multi-proposal supersession, still unfixed and
+  deferred to the Claude Code rebuild — see the migration requirement doc).
+- This case now serves two purposes at once: proof the full happy path works, and a standing
+  repro of the still-open multi-proposal issue, side by side.
+- Next action for Luo: none required to close this test. Whatever comes next (Days 4–7 of the
+  12-day plan — duplicate-proposal handling, audit-trail correctness, remaining demo screens) is a
+  fresh decision, not a continuation of this specific test.

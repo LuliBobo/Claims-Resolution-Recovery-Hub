@@ -67,10 +67,15 @@ discovered by executing the flow, not by reading the spec text:
    with a real, legible shipping-label image confirmed it was rejected as `insufficient` for
    exactly this reason. As found, **no damaged-delivery case could ever reach `evidenceComplete:
    true` through genuine AI judgment** — this is not a demo-data artifact, it's a structural gap.
-   A fix (explicit, category-specific sufficiency criteria — e.g. shipping label: legible with
-   visible carrier/tracking info, not damage depiction) was proposed but not yet built as of the
-   last session. **Migration takeaway: define sufficiency criteria per evidence category
-   explicitly from the start; never reuse one category's pass/fail bar for another.**
+   **Fixed and built live, verified end-to-end**: explicit, category-specific sufficiency criteria
+   were added — `photo_evidence` still requires visible damage/condition, `shipping_label`
+   requires legibility plus identifying shipment info (tracking number, carrier, address, ship
+   date), `invoice`/`correspondence`/`other` require legibility and relevance. A fresh upload
+   after the fix was judged `sufficient` under the corrected criteria, and the full downstream
+   chain (evidence complete → approved → resolution proposal sent → recovery draft sent) completed
+   successfully — the first fully-closed happy path demonstrated in this workspace. **Migration
+   takeaway: define sufficiency criteria per evidence category explicitly from the start; never
+   reuse one category's pass/fail bar for another.**
 
 ## Approval workflow
 1. A reviewer sees every pending Human Approval in a dedicated queue.
