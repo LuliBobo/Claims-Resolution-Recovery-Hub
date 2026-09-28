@@ -75,6 +75,10 @@ canonical business-rule description these findings feed into.
   (rejected via `reviewApproval`, explicitly authorized) as part of a Days-4–7 cleanup pass — this
   was operational cleanup, not a code fix; Bug #1 itself remains unfixed and deferred to the
   Claude Code rebuild (see the migration requirement doc's Part E update).
+- Case status: manually set to `resolved` (`resolved_at: 2026-09-28T06:07:25Z`) — a one-time
+  catch-up since Bug #4's status auto-advance fix (see
+  `Migration/migration_handoff_public_02_business_rules_and_workflows.md`) isn't retroactive and
+  this case's proposal/draft were both already sent before that fix existed.
 - Next action for Luo: none required to close this test. Whatever comes next (remaining Days 4–7
   items — audit-trail correctness, remaining demo screens) is a fresh decision, not a continuation
   of this specific test.
