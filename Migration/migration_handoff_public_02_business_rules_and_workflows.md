@@ -13,6 +13,20 @@ new → in_review → awaiting_approval → resolved
 `resolved`/`escalated`/`closed` are set via manual case edits. Every status change is logged as an
 AuditEvent (previous_state → new_state).
 
+**Verified via live E2E testing (2026-09-28):** the "`awaiting_approval` set automatically" claim
+above was, for a long time, aspirational rather than actually implemented — no workflow function
+(`createCustomerCase`, `regenerateResolutionProposal`, `regenerateRecoveryDraft`, `reviewApproval`,
+`actionResolutionProposal`, `sendRecoveryDraft`) ever advanced `status` past `'new'`; only the
+manual `updateCustomerCase` could. A case could complete its entire approval/send lifecycle and
+still show `'new'` in the Case Queue. **Fixed and built live**: a guarded auto-advance step
+(`'new' → 'awaiting_approval'` only, never touching later statuses) was added to the three
+generation functions. The `resolved`/`escalated`/`closed` transitions remain intentionally
+manual-only, unchanged — this fix only restored the one transition the design always claimed to
+have. **Migration takeaway: verify status-transition behavior by testing a case through its full
+lifecycle, not by reading the spec's stated intent** — this is the second time in this project a
+documented "X happens automatically" claim didn't match the generated code (see the
+`getCustomerCase` evidence-flag regression above).
+
 ## Case intake & auto-triage workflow
 1. Case submitted (manually, in this build — no live inbound channel integration exists despite
    the schema modeling `source` as email/chat/phone/marketplace/web_form).
