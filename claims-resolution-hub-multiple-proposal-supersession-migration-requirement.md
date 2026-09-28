@@ -123,6 +123,8 @@ No decision has been made. Do not build the reconciliation API against either as
 
 The real 4-proposal case found in this workspace (masked id `0839…8632`) must not be modified, reconciled, or have any proposal/approval status changed by this work, now or as part of any future "cleanup," until a separate, explicit decision authorizes touching it. It remains exactly as originally observed: 4 proposals (`status='pending_approval'`), 5 pending Human Approvals.
 
+**Update (2026-09-28):** that explicit authorization was given, and this case (plus the second, E2E-TEST repro case) was manually reconciled using only existing APIs (`reviewApproval` rejections + one fresh `regenerateResolutionProposal` call) — no spec/schema change, not the Part B design. This was **operational cleanup, not a fix**: the underlying data-model gap (no ordering field, no current-pointer, regeneration never retires prior state) is completely unchanged, and calling `regenerateResolutionProposal` again on either case today would immediately recreate the same mess. Everything else in Parts A–D still applies exactly as written; this update only means "the specific messy case that was found" no longer exists in its original found-state, not that the bug is fixed. Full reconciliation detail is in project memory, not duplicated here to keep this document focused on the unbuilt requirement.
+
 Do not silently choose or default a "current" proposal for this or any similarly ambiguous case. Ambiguous means: stop and ask, don't infer from row order, IDs, or denormalized text-match ties (the denormalized `resolution_recommendation` field was found to tie between 2 of the 4 proposals and is not usable as a tiebreaker).
 
 ## Part F — Test/Cleanup Constraint

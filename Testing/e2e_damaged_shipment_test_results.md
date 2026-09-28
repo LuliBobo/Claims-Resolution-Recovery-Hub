@@ -29,9 +29,12 @@ canonical business-rule description these findings feed into.
 ## Bugs found
 
 1. **Multiple-proposal supersession** — reproduced on this case too (see the addendum in
-   `claims-resolution-hub-multiple-proposal-supersession-migration-requirement.md`). Out of scope
-   for a Luo fix (unresolved concurrency/authorization blockers); deferred to the Claude Code
-   rebuild. This case's stale original proposal/approval were deliberately left untouched.
+   `claims-resolution-hub-multiple-proposal-supersession-migration-requirement.md`). The underlying
+   bug is out of scope for a Luo code fix (unresolved concurrency/authorization blockers); deferred
+   to the Claude Code rebuild. On 2026-09-28, this case's stale proposal/approval — along with the
+   original 4-proposal case found earlier — were manually reconciled (rejected via `reviewApproval`
+   with an explanatory comment) as an explicitly-authorized operational cleanup, not a code fix;
+   see the requirement doc's Part E update for detail. The bug itself remains unfixed.
 2. **Evidence `sufficient` vs. `present` mismatch** — workspace-wide, not case-specific. **Fixed
    and built live.** Two rounds were needed: the first fix updated `createCustomerCase`/
    `regenerateResolutionProposal` but `getCustomerCase` silently failed to inherit it via a
@@ -68,11 +71,10 @@ canonical business-rule description these findings feed into.
 - Resolution proposal `1631f2b4…`: `status: sent`.
 - Recovery draft `210131c5…`: `status: sent`, `sent_at: 2026-09-28T04:17:03Z` — Counterparty DPD,
   €45.00, tracking `E2E-TEST-TRACK-0001`.
-- Stale original proposal `f72cdfb1…` / approval `666f9cee…`: still untouched, deliberately
-  preserved as a live repro instance for Bug #1 (multi-proposal supersession, still unfixed and
-  deferred to the Claude Code rebuild — see the migration requirement doc).
-- This case now serves two purposes at once: proof the full happy path works, and a standing
-  repro of the still-open multi-proposal issue, side by side.
-- Next action for Luo: none required to close this test. Whatever comes next (Days 4–7 of the
-  12-day plan — duplicate-proposal handling, audit-trail correctness, remaining demo screens) is a
-  fresh decision, not a continuation of this specific test.
+- Stale original proposal `f72cdfb1…` / approval `666f9cee…`: **manually reconciled 2026-09-28**
+  (rejected via `reviewApproval`, explicitly authorized) as part of a Days-4–7 cleanup pass — this
+  was operational cleanup, not a code fix; Bug #1 itself remains unfixed and deferred to the
+  Claude Code rebuild (see the migration requirement doc's Part E update).
+- Next action for Luo: none required to close this test. Whatever comes next (remaining Days 4–7
+  items — audit-trail correctness, remaining demo screens) is a fresh decision, not a continuation
+  of this specific test.
