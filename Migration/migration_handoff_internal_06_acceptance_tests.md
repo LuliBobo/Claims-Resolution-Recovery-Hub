@@ -1,71 +1,44 @@
 # 06 — Acceptance Tests (Internal)
 
-These are **behavioral checks derived from verified rules/workflows** (`internal/02`), for the
-migration target to validate against. None of these were executed against production data as part
-of this task (no writes, sends, approvals, or regenerations were performed here) — they are
-written as a checklist for the migration team to run themselves, using disposable test data.
+Originally written (2026-09-25) as a **hypothetical checklist** derived from spec text alone, before any live execution. **Updated 2026-09-28** after a live E2E verification pass against the actual running app, using the E2E-TEST case (`95382638-8a8f-42eb-8f12-5f72fa24b24b`) and the pre-existing multi-proposal case (`08395150-a778-40a1-b495-8ee187068632`, masked per the sensitivity review — see `migration_handoff_internal_07_case_inventory...INTERNAL_ONLY.md`). Every item below carries its real observed result. See `../Testing/e2e_damaged_shipment_test_results.md` for the full narrative and `../claims-resolution-hub-multiple-proposal-supersession-migration-requirement.md` for the unfixed architectural gap.
+
+Legend: ✅ verified true · ⚠️ verified, original wording incomplete/wrong · ❌ verified false, since fixed · ⏸ not independently tested this pass
 
 ## 1. Case intake & auto-triage
-- [ ] Creating a case in a non-English language populates `internal_english_summary` via
-      translation, distinct from the original `complaint_text`.
-- [ ] Omitting `case_type`/`priority` on create causes the system to classify them automatically
-      rather than leaving them null.
-- [ ] Creating a `damaged_delivery` case matching an active Rule produces exactly one new
-      `ResolutionProposal` (`status = pending_approval`) and exactly one new `HumanApproval`
-      (`approval_type = resolution_proposal`, `decision = pending`) referencing it.
-- [ ] If the generated proposal implies recovery is possible, exactly one `RecoveryDraft`
-      (`status = pending_approval` or `draft`, per spec) is also created with its own
-      `HumanApproval`.
-- [ ] Case `status` becomes `awaiting_approval` once generation completes, and an `AuditEvent` is
-      recorded for case creation and for status change.
+- ✅ Non-English complaint → `internal_english_summary` via translation, distinct from original. Verified against a real Slovak-language case (`3562f09c…`): translation exact, `case_type: wrong_item` / `priority: medium` classification sound.
+- ✅ Omitting `case_type`/`priority` → automatic classification. Verified repeatedly.
+- ⚠️ **True only for the first generation.** `regenerate_resolution_proposal` creates a brand-new `ResolutionProposal`+`HumanApproval` pair every time, never retiring the prior one — reproduced independently on both the pre-existing multi-proposal case `08395150…` (4 proposals found) and the E2E-TEST case (reproduced live on its very first regenerate call: proposal `1631f2b4…` created alongside untouched `f72cdfb1…`). No `created_at`, no sequence field, no `is_current` flag exists anywhere in the schema. Both cases were manually reconciled 2026-09-28 (stale approvals rejected via `review_approval`, one fresh proposal generated for case `08395150…` since neither existing "standard" proposal matched that case's actual current zero-evidence state) — this is cleanup, not a fix; calling `regenerate_resolution_proposal` again on either case would immediately recreate the mess.
+- ✅ Proposal implying recovery → `RecoveryDraft` + its own `HumanApproval`.
+- ❌→✅ **Case `status` auto-advance to `awaiting_approval` was never implemented — Bug #4.** Confirmed via reading generated code: `create_customer_case`, `regenerate_resolution_proposal`, `regenerate_recovery_draft`, `review_approval`, `action_resolution_proposal`, `send_recovery_draft` all left `status` untouched; only manual `update_customer_case` could change it. Case `08395150…` only *looked* correct because of a manual patch made during synthetic-data seeding — proven by the E2E-TEST case sitting on `'new'` through its entire approve/send lifecycle until the fix. **Fixed live**: guarded step added to the three generation functions (`'new' → 'awaiting_approval'` only, all other statuses untouched); `resolved`/`escalated`/`closed` remain manual-only by design. Verified with a disposable case (`97975d89…`): status correctly `awaiting_approval` immediately post-creation with a clean `status_changed` audit event.
 
 ## 2. DPD Carrier Claims SOP evidence gate
-- [ ] For a `damaged_delivery` case with **no** evidence attachments and an active DPD SOP rule,
-      the Resolution Proposal's recommendation is exactly `"Request Missing Evidence"`.
-- [ ] Uploading all 3 required evidence photos (shipping label, damaged item, outer carton) and
-      re-reading the case via `get_customer_case` flips `evidence_complete` to `true` and updates
-      the live-computed booleans, without requiring a new proposal to be manually regenerated.
-- [ ] With `evidence_complete = false`, calling `send_recovery_draft` on an *approved* draft is
-      **refused** with an evidence-related error, even though approval alone would otherwise allow
-      sending.
-- [ ] Deleting an evidence attachment flips `evidence_complete` back to `false` on next read (no
-      caching of the stale "complete" state).
+- ✅ No evidence + active DPD SOP rule → recommendation forced exactly `"Request Missing Evidence"`.
+- ⚠️ **"Uploading evidence flips completeness on re-read" was true but hid a deeper bug (evidence-status mismatch).** `evidence_complete`/the three booleans require each matching Attachment's `evidence_status == 'sufficient'` specifically — `create_customer_case`/`regenerate_resolution_proposal` originally only required non-`not_applicable`, and `get_customer_case` was *supposed* to inherit the stricter rule via "same rules as..." spec phrasing but the code generator silently didn't apply it — a real regression caught only by re-testing after the first fix looked complete. All four functions now require `'sufficient'` explicitly, no cross-reference wording. Separately confirmed: the *displayed* `resolution_proposal.recommendation` text does not change on a passive `get_customer_case` read — only an explicit `regenerate_resolution_proposal` call rewrites the stored text; the live-recomputed part is only the transient evidence booleans.
+- ⚠️ **A second, more severe evidence bug found in the same area**: the AI judgment step that sets `evidence_status` applied one "does this show damage?" bar uniformly to every photo category — a shipping label can never satisfy that, since it documents the shipment, not the item's condition. No `damaged_delivery` case could ever reach `evidenceComplete: true` through genuine AI judgment until fixed. **Fixed live** with explicit, category-specific criteria in `upload_attachment`'s judgment step.
+- ✅ Evidence incomplete → `send_recovery_draft` on an *approved* draft refused with an evidence-related error. Verified directly, repeatedly.
+- ✅ (from prior session's positive/negative-path test on case `08395150…`) Removing evidence attachments flips `evidence_complete` back to `false` on next read, no stale caching.
+- ✅ **First fully-closed happy path demonstrated in this workspace, 2026-09-28**: case `95382638…` → evidence genuinely sufficient (independently verified: attachment id `4168e8da…`, uploaded post-fix, `ai_notes` grading legibility/tracking/carrier, confirmed not a leftover of the deleted pre-fix record `60863b00…`) → both approvals → `resolution_proposal_sent` (`1631f2b4…`) → `recovery_draft_sent` (`210131c5…`, `2026-09-28T04:17:03Z`, DPD, €45.00).
 
 ## 3. Approval gating
-- [ ] `action_resolution_proposal` refuses to mark a proposal `sent` while its status is
-      `pending_approval` or `rejected` — succeeds only when `approved`.
-- [ ] `send_recovery_draft` refuses to mark a draft `sent` while `pending_approval` or `rejected`,
-      and (per #2) also refuses if DPD evidence is incomplete even when `approved`.
-- [ ] `review_approval` approving a `resolution_proposal`-type approval updates the linked
-      proposal's `status` to `approved`; rejecting sets it to `rejected`. Same pattern verified
-      for `recovery_draft`-type approvals against the linked draft, with `approved_at` stamped on
-      approval.
+- ⏸ `action_resolution_proposal` refusing an unapproved proposal — not independently exercised as a negative case this pass (consistent with everything observed, including the guard-ordering design in the unbuilt multi-proposal fix proposal).
+- ✅ `send_recovery_draft` refuses unless approved, and separately refuses if DPD evidence is incomplete even when approved — both independently confirmed live on `210131c5…`.
+- ✅ `review_approval` updates the linked proposal/draft status correctly on approve/reject, stamps `decision_time` only on a real decision. Extensively exercised via the reconciliation actions — including confirming a *different* approval's already-recorded human decision (`decision`, `reviewer`, `reviewer_comment`, `decision_time`) is never altered by rejecting a separate stale one.
 
 ## 4. Attachment deletion restriction (`delete_attachment`)
-- [ ] Attempting to delete an attachment whose `file_name` does **not** start with `test_` or
-      `synthetic_`, and whose id is not the hardcoded exception UUID, is refused.
-- [ ] Attachments named with a `test_` or `synthetic_` prefix can be deleted.
-- [ ] Confirm whether the one-time hardcoded exception UUID
-      (`3ab6bf6c-02ed-4275-a422-57dbe51894b6`) should be removed from the migration target's
-      equivalent logic — it was a one-off cleanup mechanism for this workspace's own accidental
-      test data, not a general-purpose rule, and porting it verbatim would carry over a dead
-      special case tied to an ID meaningless on a new system.
-- [ ] Deleting an attachment does not modify any other entity (case, proposal, draft, approval,
-      audit event) — single-row delete only.
-- [ ] **Cannot be checked from this workspace**: whether the underlying binary is purged from file
-      storage on delete (see `01_verified_inventory.md` §7) — the migration target should verify
-      this independently for whatever storage backend it uses.
+- ⏸ Refusal for a non-`test_`/`synthetic_` filename — established in the prior session, not re-exercised this pass.
+- ✅ `test_`/`synthetic_`-prefixed attachments deletable — used routinely (multiple cleanup rounds this pass).
+- ✅ The one-time hardcoded exception UUID (`3ab6bf6c-02ed-4275-a422-57dbe51894b6`) — **confirmed already removed** from the live handler (prior session), re-confirmed absent, no regression.
+- ✅ Deletion modifies no other entity — confirmed via audit-trail inspection after each deletion round this pass.
+- ⏸ Binary-storage purge on delete — still unverifiable, no tool exposes it.
 
 ## 5. Insights & reporting
-- [ ] `recompute_insights` fully replaces the `InsightRecord` set from currently `resolved`/
-      `escalated` cases (no stale rows left from a previous run).
-- [ ] The nightly and weekly scheduled jobs run at the specified cron schedule/timezone and invoke
-      the correct backend function without requiring manual triggering.
-- [ ] `generate_weekly_report` writes to the Knowledge Base and does not error if there is no
-      activity in the given week (empty-but-valid report).
+- ✅ `recompute_insights` fully replaces the prior `InsightRecord` set — verified live: manual trigger correctly replaced a stale 2-record set with an accurate fresh 3-record set (`insightsGenerated: 3`) including the just-resolved E2E-TEST case's SKU/carrier/supplier/warehouse, all fields matching source data exactly.
+- ⏸ Nightly/weekly cron jobs firing on schedule without manual triggering — **not observed this pass**, only the manual-trigger paths were exercised. Given how many "shares the same logic" spec claims turned out wrong elsewhere (§1, §2), do not assume the cron path is identical to the manual path without separately verifying it.
+- ✅ `generate_weekly_report` — verified live for the week 2026-09-21→27: 5 cases opened, 1 draft approved, €45 carrier-side recoverable, top-3 carriers/SKUs by frequency, saved to Knowledge Base at `reports/weekly-report-2026-09-21.md`, content read back and confirmed real. Correctly labeled 2 resolved cases + 1 approved draft as "timestamp unavailable" (predating the `resolved_at`/`approved_at` fields) rather than silently omitting or fabricating dates. One number ("Cases Opened: 5") was double-checked against an apparent discrepancy (6 cases existed) and found correct — the 6th case was genuinely created in the *following* week (Mon 2026-09-28 07:31 local), not a timezone-boundary bug. Not separately tested for a zero-activity week.
 
-## 6. Data model integrity
-- [ ] Every `human_approval` row has exactly one of `linked_resolution_proposal_id` /
-      `linked_recovery_draft_id` set (consistent with `approval_type`), never both, never neither.
-- [ ] No orphaned `attachment`, `resolution_proposal`, `recovery_draft`, `human_approval`, or
-      `audit_event` row exists without a valid `linked_case_id` pointing to an existing case.
+## 6. Policy & Rules Admin (not in original checklist — added 2026-09-28)
+- ✅ `createPolicyDocument`/`createRule` succeed and are immediately reflected in `listPolicyDocuments`/`listRules`. Used to fill a real gap: `missing_item` case type had zero active rule coverage before this — created "Missing Item Investigation Protocol" (policy `b3e20f4f…`) + linked rule (`bfdbbe7f…`, `trigger_type: missing_item`).
+- ✅ Discoverability confirmed: `listRules({triggerType: 'missing_item', activeOnly: true})` returns exactly the new rule, with its linked policy independently confirmed active — this is the same filter shape a resolution-proposal rule lookup would use.
+
+## 7. Data model integrity
+- ⏸ Not independently tested this pass: every `human_approval` having exactly one of `linked_resolution_proposal_id`/`linked_recovery_draft_id` set; no orphaned child rows without a valid `linked_case_id`. Both remain plausible from the schema but unverified by direct query this round.
