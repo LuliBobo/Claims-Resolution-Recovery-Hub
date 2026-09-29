@@ -1,7 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Claims Resolution & Recovery Hub — schema.
+// Source spec: Migration/migration_handoff_public_01_verified_inventory.md §1 and
+// claims-resolution-hub-multiple-proposal-supersession-migration-requirement.md (Part B.4).
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +9,371 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ---------- Enums (ported as-is from the verified live schema) ----------
+
+enum UserRole {
+  agent
+  reviewer
+  admin
+}
+
+enum CaseType {
+  damaged_delivery
+  wrong_item
+  missing_item
+  return_request
+  other
+}
+
+enum CasePriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum CaseSource {
+  email
+  chat
+  phone
+  marketplace
+  web_form
+  other
+}
+
+enum CaseStatus {
+  new
+  in_review
+  awaiting_approval
+  resolved
+  escalated
+  closed
+}
+
+enum AttachmentCategory {
+  photo_evidence
+  invoice
+  shipping_label
+  correspondence
+  other
+}
+
+enum EvidenceStatus {
+  pending_review
+  sufficient
+  insufficient
+  not_applicable
+}
+
+enum ApprovalType {
+  resolution_proposal
+  recovery_draft
+}
+
+// `superseded` is new (not in Luo). It is system-replaced, never a human rejection.
+enum ApprovalDecision {
+  pending
+  approved
+  rejected
+  superseded
+}
+
+enum InsightTrend {
+  up
+  down
+  stable
+}
+
+enum PolicyDocumentType {
+  policy
+  terms
+  carrier_agreement
+  supplier_agreement
+  other
+}
+
+enum RecoveryCounterpartyType {
+  carrier
+  supplier
+}
+
+enum RecoveryDraftStatus {
+  draft
+  pending_approval
+  approved
+  sent
+  rejected
+  resolved
+}
+
+// `superseded` is new (not in Luo). Never conflated with `rejected`.
+enum ProposalStatus {
+  pending_approval
+  approved
+  rejected
+  sent
+  superseded
+}
+
+enum RuleTriggerType {
+  damaged_delivery
+  wrong_item
+  missing_item
+  return_request
+  other
+}
+
+enum ShipmentDeliveryStatus {
+  pending
+  in_transit
+  delivered
+  delayed
+  lost
+  returned
+}
+
+// ---------- Auth ----------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         UserRole @default(agent)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------- Reference data ----------
+
+model Order {
+  id            String   @id @default(uuid())
+  orderDate     DateTime
+  salesChannel  String
+  customerName  String
+  customerEmail String?
+  customerPhone String?
+  sku           String
+  productName   String
+  quantity      Int
+  orderValue    Decimal  @db.Decimal(12, 2)
+  supplier      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  shipments Shipment[]
+  cases     CustomerCase[]
+}
+
+model Shipment {
+  id             String                 @id @default(uuid())
+  linkedOrderId  String
+  carrier        String
+  trackingNumber String
+  warehouse      String?
+  shipDate       DateTime?
+  deliveryDate   DateTime?
+  deliveryStatus ShipmentDeliveryStatus @default(pending)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  order Order          @relation(fields: [linkedOrderId], references: [id])
+  cases CustomerCase[]
+
+  @@index([linkedOrderId])
+}
+
+model PolicyDocument {
+  id           String             @id @default(uuid())
+  name         String
+  documentType PolicyDocumentType
+  version      String?
+  jurisdiction String?
+  activeStatus Boolean            @default(true)
+  summary      String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  rules Rule[]
+}
+
+model Rule {
+  id                     String          @id @default(uuid())
+  ruleName               String
+  triggerType            RuleTriggerType
+  requiredEvidence       String?
+  recommendedResolution  String?
+  escalationPath         String?
+  linkedPolicyDocumentId String?
+  activeStatus           Boolean         @default(true)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  linkedPolicyDocument PolicyDocument? @relation(fields: [linkedPolicyDocumentId], references: [id])
+
+  @@index([triggerType, activeStatus])
+}
+
+// ---------- Cases ----------
+
+model CustomerCase {
+  id                          String       @id @default(uuid())
+  createdAt                   DateTime     @default(now())
+  source                      CaseSource
+  status                      CaseStatus   @default(new)
+  caseType                    CaseType
+  customerName                String
+  customerEmail               String?
+  customerPhone               String?
+  customerLanguage            String       @default("en")
+  orderReference              String?
+  complaintText               String
+  internalEnglishSummary      String?
+  priority                    CasePriority @default(medium)
+  linkedOrderId               String?
+  linkedShipmentId            String?
+  // Denormalized cache of the current proposal's recommendation text (write-through).
+  resolutionRecommendation    String?
+  recoveryNeeded              Boolean      @default(false)
+  assignedReviewer            String?
+  resolvedAt                  DateTime?
+  // Set when LLM translate/classify failed at intake; case still created, needs manual triage.
+  needsManualTriage           Boolean      @default(false)
+  // Single stored source of truth for "which proposal is current" (supersession Part B.2).
+  currentResolutionProposalId String?      @unique
+
+  order                     Order?              @relation(fields: [linkedOrderId], references: [id])
+  shipment                  Shipment?           @relation(fields: [linkedShipmentId], references: [id])
+  currentResolutionProposal ResolutionProposal? @relation("CurrentProposal", fields: [currentResolutionProposalId], references: [id], onDelete: SetNull)
+
+  attachments         Attachment[]
+  resolutionProposals ResolutionProposal[] @relation("CaseProposals")
+  recoveryDrafts      RecoveryDraft[]
+  auditEvents         AuditEvent[]
+  humanApprovals      HumanApproval[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([linkedOrderId])
+  @@index([linkedShipmentId])
+}
+
+model Attachment {
+  id                  String             @id @default(uuid())
+  linkedCaseId        String
+  fileName            String
+  // Untrusted value sent by the client.
+  declaredContentType String
+  // Detected from the actual bytes; the value everything else should trust.
+  sniffedContentType  String?
+  contentTypeMismatch Boolean            @default(false)
+  attachmentCategory  AttachmentCategory @default(other)
+  aiNotes             String?
+  // The single field every consumer reads to decide whether evidence is sufficient.
+  evidenceStatus      EvidenceStatus     @default(pending_review)
+  // Opaque storage reference (blob key / path).
+  storageRef          String
+  createdAt           DateTime           @default(now())
+
+  case CustomerCase @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
+
+  @@index([linkedCaseId])
+}
+
+model ResolutionProposal {
+  id                  String         @id @default(uuid())
+  linkedCaseId        String
+  recommendation      String
+  rationale           String
+  confidence          Float?
+  customerImpact      String?
+  businessExposure    String?
+  // Free text, not a real FK.
+  policySource        String?
+  needsHumanApproval  Boolean        @default(true)
+  status              ProposalStatus @default(pending_approval)
+  // AI-written, customer-facing reply in the case's customer_language.
+  customerReplyDraft  String?
+  // True when the deterministic evidence gate overwrote `recommendation`.
+  evidenceGateApplied Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  supersededAt        DateTime?
+
+  case           CustomerCase    @relation("CaseProposals", fields: [linkedCaseId], references: [id], onDelete: Cascade)
+  currentForCase CustomerCase?   @relation("CurrentProposal")
+  approvals      HumanApproval[]
+
+  @@index([linkedCaseId, createdAt])
+}
+
+model RecoveryDraft {
+  id                        String                   @id @default(uuid())
+  linkedCaseId              String
+  counterpartyType          RecoveryCounterpartyType
+  counterpartyName          String
+  claimType                 String
+  draftText                 String
+  estimatedRecoverableValue Decimal?                 @db.Decimal(12, 2)
+  status                    RecoveryDraftStatus      @default(draft)
+  approvedAt                DateTime?
+  sentAt                    DateTime?
+  createdAt                 DateTime                 @default(now())
+
+  case      CustomerCase    @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
+  approvals HumanApproval[]
+
+  @@index([linkedCaseId])
+}
+
+model AuditEvent {
+  id            String   @id @default(uuid())
+  linkedCaseId  String
+  eventTime     DateTime @default(now())
+  actor         String
+  action        String
+  previousState String?
+  newState      String?
+  ruleSource    String?
+  notes         String?
+
+  case CustomerCase @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
+
+  @@index([linkedCaseId, eventTime])
+}
+
+model HumanApproval {
+  id                         String           @id @default(uuid())
+  linkedCaseId               String
+  approvalType               ApprovalType
+  linkedResolutionProposalId String?
+  linkedRecoveryDraftId      String?
+  reviewer                   String?
+  decision                   ApprovalDecision @default(pending)
+  reviewerComment            String?
+  // Reserved for real human decisions only.
+  decisionTime               DateTime?
+  // Distinct from decisionTime: when the system superseded a still-pending approval.
+  supersededAt               DateTime?
+  createdAt                  DateTime         @default(now())
+
+  case               CustomerCase        @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
+  resolutionProposal ResolutionProposal? @relation(fields: [linkedResolutionProposalId], references: [id])
+  recoveryDraft      RecoveryDraft?      @relation(fields: [linkedRecoveryDraftId], references: [id])
+
+  @@index([linkedCaseId])
+  @@index([decision])
+}
+
+model InsightRecord {
+  id             String       @id @default(uuid())
+  sku            String?
+  carrier        String?
+  supplier       String?
+  warehouse      String?
+  issueType      String
+  frequency      Int
+  trendDirection InsightTrend @default(stable)
+  createdAt      DateTime     @default(now())
 }
