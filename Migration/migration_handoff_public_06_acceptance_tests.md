@@ -20,7 +20,7 @@ Legend: ✅ verified true as originally stated · ⚠️ verified, but the origi
 - ✅ **End-to-end proof**: once both bugs above were fixed, one case was carried all the way through evidence-complete → approved → resolution proposal sent → recovery draft sent — the first fully-closed happy path demonstrated in this workspace, independently verified (not taken on the system's word) by checking the winning attachment record's id, timestamp, and AI notes directly.
 
 ## 3. Approval gating
-- ⏸ Mark-as-sent for a resolution proposal being refused unless approved — architecturally consistent with everything observed, but not independently exercised as a negative-path test this pass.
+- ✅ Mark-as-sent for a resolution proposal being refused unless approved — verified live against a real pending proposal: refused with an approval-related error, and confirmed the call mutated nothing (proposal status, approval decision, and audit-event count all unchanged before/after).
 - ✅ Mark-as-sent for a recovery draft is refused unless approved, and also refused if evidence is incomplete even when approved — both conditions independently confirmed live.
 - ✅ Approving/rejecting a proposal-type or draft-type approval updates the linked record's status accordingly, stamping the approval timestamp only on approval — exercised extensively via real reconciliation actions, including confirming that a rejection never alters a *different* approval's own already-recorded human decision.
 
@@ -41,4 +41,4 @@ Legend: ✅ verified true as originally stated · ⚠️ verified, but the origi
 - ✅ A newly created, active Rule is correctly discoverable by the same trigger-type/active-only filter shape a resolution-proposal lookup would use — confirmed by creating a real rule for a case type (`missing_item`) that had no coverage at all, and independently re-querying for it.
 
 ## 7. Data model integrity
-- ⏸ Not independently tested this pass: every human approval having exactly one of its two possible linked-record references set; no orphaned child records without a valid parent case. Both remain plausible from the schema but unverified by direct query in this round.
+- ✅ Verified live via direct query across the whole workspace: every human approval has exactly one of its two possible linked-record references set, always matching its declared approval type (0 exceptions across 14 rows). No orphaned Attachment, ResolutionProposal, RecoveryDraft, HumanApproval, or AuditEvent row exists without a valid parent case (0 orphans, 0 null case references, across all entities and all 6 cases).

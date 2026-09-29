@@ -34,7 +34,9 @@ Full detail: `Migration/migration_handoff_public_06_acceptance_tests.md` (rewrit
 
 **Genuinely verified live, this week, against the running app** (not just spec text): case intake + AI classification, multilingual translation, the DPD evidence gate end to end (including a fully-closed happy path: evidence → approve → proposal sent → recovery draft sent), approval gating, attachment deletion restrictions, insight recomputation, weekly report generation, Policy & Rules Admin CRUD.
 
-**Not independently tested this week** (lower risk, but genuinely unverified, don't assume): the Orders/Shipments management *UI forms* specifically (the underlying create APIs are extremely well-tested; the actual click-through forms are not); `actionResolutionProposal`'s refusal of an unapproved proposal as a negative-path test; scheduled jobs actually firing on their cron schedule without manual triggering (only the manual-trigger code paths were exercised); data-model integrity invariants (§7 of the acceptance tests doc — every `human_approval` having exactly one linked reference, no orphaned child rows).
+**Update 2026-09-28 (later same day):** `actionResolutionProposal`'s refusal of an unapproved proposal and the data-model integrity invariants (§7) were both subsequently verified live and clean — see the acceptance-tests doc for detail (zero-mutation refusal confirmed; zero orphans/link-mismatches across the entire workspace).
+
+**Still not independently tested** (lower risk, but genuinely unverified, don't assume): the Orders/Shipments management *UI forms* specifically (the underlying create APIs are extremely well-tested; the actual click-through forms are not); scheduled jobs actually firing on their cron schedule without manual triggering (only the manual-trigger code paths were exercised).
 
 ## 4. Known deficiencies (confirmed live status, 2026-09-28)
 
