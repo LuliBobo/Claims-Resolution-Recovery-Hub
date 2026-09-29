@@ -2,6 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type UserRole } from "../src/generated/prisma/client";
+import { SEED_POLICIES, SEED_RULES } from "../src/server/reference-data/seed-data";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -27,9 +28,27 @@ async function seedUsers() {
   }
 }
 
+async function seedPoliciesAndRules() {
+  const idByName = new Map<string, string>();
+  for (const p of SEED_POLICIES) {
+    const existing = await prisma.policyDocument.findFirst({ where: { name: p.name } });
+    const row = existing ?? (await prisma.policyDocument.create({ data: { ...p } }));
+    idByName.set(p.name, row.id);
+  }
+  for (const { policyName, ...r } of SEED_RULES) {
+    const exists = await prisma.rule.findFirst({ where: { ruleName: r.ruleName } });
+    if (!exists) {
+      await prisma.rule.create({
+        data: { ...r, linkedPolicyDocumentId: idByName.get(policyName) },
+      });
+    }
+  }
+}
+
 async function main() {
   await seedUsers();
-  // M2/M8: policies + rules, then Orders/Shipments/Cases/Attachments from CSVs, then
+  await seedPoliciesAndRules();
+  // M8: Orders/Shipments/Cases/Attachments from CSVs, then
   // proposals/approvals/drafts/audit events driven through the real workflow functions.
 }
 
