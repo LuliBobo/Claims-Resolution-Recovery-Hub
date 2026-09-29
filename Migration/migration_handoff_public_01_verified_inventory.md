@@ -39,7 +39,16 @@ All content **VERIFIED** directly against the live spec and live database schema
   **VERIFIED: no creation-timestamp column exists.**
 - **ResolutionProposal** — linked_case_id (FK), recommendation, rationale, confidence,
   customer_impact, business_exposure, policy_source (free text, not a real FK),
-  needs_human_approval, status (pending_approval/approved/rejected/sent).
+  needs_human_approval, status (pending_approval/approved/rejected/sent),
+  **customer_reply_draft (text, nullable — added 2026-09-28/29)**: an AI-generated,
+  customer-facing reply written in the case's `customer_language`, produced in the same
+  generation call as `recommendation`/`rationale`/etc. Distinct from those internal-facing
+  fields — this one is meant to be usable as-is for an actual customer reply, and is null on
+  every proposal generated before this field existed. Closes a real gap between the original
+  product concept (which always described multilingual customer reply drafting as a core
+  capability) and what had actually been built — verified live with a Slovak-language test case:
+  populated, genuinely in Slovak (not English), reads as an appropriate customer-facing reply
+  with no internal notes leaking in.
   **VERIFIED: no creation-timestamp column exists** — this is a genuine schema gap when several
   proposals accumulate against one case; see §5 and the acceptance-test checklist.
 - **RecoveryDraft** — linked_case_id (FK), counterparty_type (carrier/supplier), counterparty_name,

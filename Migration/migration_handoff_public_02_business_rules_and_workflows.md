@@ -117,3 +117,23 @@ discovered by executing the flow, not by reading the spec text:
 ## Data-quality tool
 A narrow API exists to correct only a recovery draft's estimated recoverable value, logging an
 audit event — intended for fixing data-entry mistakes, not a general financial workflow.
+
+## Customer reply drafting (added 2026-09-28/29)
+A resolution proposal's generation step now also produces `customer_reply_draft` — an AI-written,
+customer-facing reply in the case's own language, alongside the existing internal-facing fields.
+This was a real capability gap (described in the original product concept, never actually built)
+rather than a bug; closing it is narrowly scoped to the generation step and one new nullable
+field, verified working end-to-end for a non-English case.
+
+## Nested Order/Shipment resolution — a pre-existing, narrow gap (found and partly fixed
+2026-09-28/29)
+Several APIs embed a `CustomerCase` object nested inside their own response (e.g. inside a
+`HumanApproval` returned by the approvals list, or inside an audit-event creation response).
+`getCustomerCase` and `updateCustomerCase` correctly resolve that nested case's
+`linked_order_id`/`linked_shipment_id` to full Order/Shipment records; two others
+(`listApprovals`, the manual audit-event creation API) did not — they returned `null` for both
+even when a real link existed, despite no actual data-integrity problem underneath. **Fixed**,
+scoped to exactly those two APIs, verified against live data before and after. Two further
+APIs flagged similarly by the build's own static warnings (`recomputeInsights`, `uploadAttachment`)
+were checked live and found **not actually affected** — worth remembering as another instance of
+a build-time warning not matching runtime behavior; verify before fixing, not after.

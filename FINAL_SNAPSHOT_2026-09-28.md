@@ -4,6 +4,8 @@
 
 This document is an index and summary. It does not duplicate detail that already lives elsewhere in this repo — it points to it.
 
+**Superseded-by note (2026-09-29):** the user chose to keep using the remaining Luo trial time rather than stop at this checkpoint. Since this snapshot, two more real pieces of work landed: the `customer_reply_draft` feature (closing a real gap between the original product concept and what had been built — see `Migration/migration_handoff_public_02_business_rules_and_workflows.md`) and a narrow fix to `listApprovals`/`createAuditEvent`'s nested Order/Shipment resolution. Entity counts and build/spec IDs below are as of 2026-09-28 and are now stale by a small amount; treat `Migration/` and `Testing/` as the current source of truth, and expect this gap to keep growing if Luo work continues.
+
 ## 1. Live build status (verified 2026-09-28)
 
 - Build: `2c103f48-2ccb-478c-a3d4-511e117059fe` — Done / Success, no pending builds.
