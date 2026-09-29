@@ -38,7 +38,9 @@ Full detail: `Migration/migration_handoff_public_06_acceptance_tests.md` (rewrit
 
 **Update 2026-09-28 (later same day):** `actionResolutionProposal`'s refusal of an unapproved proposal and the data-model integrity invariants (§7) were both subsequently verified live and clean — see the acceptance-tests doc for detail (zero-mutation refusal confirmed; zero orphans/link-mismatches across the entire workspace).
 
-**Still not independently tested** (lower risk, but genuinely unverified, don't assume): the Orders/Shipments management *UI forms* specifically (the underlying create APIs are extremely well-tested; the actual click-through forms are not); scheduled jobs actually firing on their cron schedule without manual triggering (only the manual-trigger code paths were exercised).
+**Update 2026-09-29:** the Orders/Shipments management UI forms were subsequently click-tested live (Add Order, New Shipment, linking) — clean, all values saved and displayed correctly, dropdowns/linking worked. One apparent typo ("Warehause A") turned out to be the tester's own free-text entry, not a system bug.
+
+**Still not independently tested**: scheduled jobs actually firing on their cron schedule without manual triggering (only the manual-trigger code paths were exercised — and, per the earlier `recomputeInsights` audit-trail check, the product has no instrumentation anywhere that could prove or disprove this either way).
 
 ## 4. Known deficiencies (confirmed live status, 2026-09-28)
 
@@ -73,7 +75,7 @@ Luo had **no role/permission system at all** — every workspace member could ca
 Case intake, AI classification, multilingual translation, evidence-gated resolution proposals, human approval gating, recovery draft generation and sending. All of this is now genuinely verified end-to-end (§3 above) — implement to the acceptance-tests doc, not just the business-rules doc, since the acceptance tests carry the corrections the business-rules doc's original claims needed.
 
 ### 5.5 Admin & management screens
-Policy & Rules Admin (CRUD verified working), Orders/Shipments manual entry (API verified extensively; UI-form click-through not independently verified — test this early in the rebuild since it's the one gap in an otherwise well-tested surface).
+Policy & Rules Admin (CRUD verified working), Orders/Shipments manual entry (API and UI form both verified working — see the 2026-09-29 update above).
 
 ### 5.6 Reporting
 Insight recomputation (verified: full-replace semantics, correct field values) and weekly report generation (verified: correct week-window math including a timezone edge case that turned out *not* to be a bug, and — worth deliberately keeping — the "timestamp unavailable" pattern for records that predate a timestamp field, rather than silently omitting or fabricating dates).
