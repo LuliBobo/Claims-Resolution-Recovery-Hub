@@ -45,3 +45,8 @@ next-env.d.ts
 
 # local uploads
 /.uploads
+
+# e2e
+/test-results
+/playwright-report
+/.uploads-e2e

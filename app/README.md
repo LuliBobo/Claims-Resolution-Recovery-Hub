@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Claims Resolution & Recovery Hub (app)
 
-## Getting Started
+Next.js (App Router) + TypeScript + PostgreSQL (Prisma) + Auth.js + shadcn-style UI.
+This is the Claude Code rebuild of the verified Luo prototype. The source spec lives in
+`../Migration/` and `../claims-resolution-hub-multiple-proposal-supersession-migration-requirement.md`;
+the build plan is `IMPLEMENTATION_PLAN.md`.
 
-First, run the development server:
+## Run locally
 
 ```bash
+cp .env.example .env            # then set AUTH_SECRET (openssl rand -base64 32)
+docker compose up -d            # or point DATABASE_URL at any Postgres 16
+npm install
+npx prisma migrate deploy
+npm run db:seed                 # users, policies, rules + the synthetic sample cases
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Seeded logins (password `changeme-dev`, or `SEED_PASSWORD`): `agent@example.com`,
+`reviewer@example.com`, `admin@example.com`. Set `SEED_SKIP_SAMPLES=1` to skip the sample cases.
+Without `ANTHROPIC_API_KEY` the app still works: AI steps fail gracefully and cases are flagged
+"needs triage".
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What |
+|---|---|
+| `npm test` | Unit + integration (real Postgres, `TEST_DATABASE_URL`, migrated automatically) |
+| `npm run test:e2e` | Playwright happy path in a real browser, own DB (`E2E_DATABASE_URL`), fake LLM |
 
-## Learn More
+E2E needs a Chromium: `npx playwright install chromium`, or `PW_CHROMIUM_PATH=/path/to/chrome`.
+`E2E_FAKE_LLM=1` swaps the Anthropic API for deterministic answers (refused when `VERCEL_ENV=production`).
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture rules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app` holds pages and route handlers only; `src/actions` are thin Server Actions;
+  `src/server` is the framework-agnostic domain layer. Cron routes and UI call the same functions.
+- The evidence gate (`src/server/evidence/carrier-claims-gate.ts`) is pure, has no LLM dependency,
+  is recomputed from current attachments on every use, and only overwrites `recommendation`.
+- "Evidence present" always means `Attachment.evidenceStatus === "sufficient"`.
+- `regenerateResolutionProposal`, review, mark-sent and reconcile all take a
+  `SELECT ... FOR UPDATE` lock on the `CustomerCase` row first, so a case never has two live proposals.
+- `AuditEvent` is append-only (database trigger). `HumanApproval` link columns are enforced by a CHECK.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploying (Vercel)
 
-## Deploy on Vercel
+`vercel.json` schedules the two cron jobs; `npm run vercel-build` runs migrations then builds.
+Environment: `DATABASE_URL`, `AUTH_SECRET`, `ANTHROPIC_API_KEY`, `CRON_SECRET`
+(Vercel sends it as a bearer token). **Do not set `E2E_FAKE_LLM`.**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open blockers before a real deployment:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Attachment storage.** `src/server/storage.ts` writes to local disk, which does not persist on
+   Vercel. Swap `putBlob`/`getBlob` for object storage (keeping the two-function interface).
+   There is also no attachment download route yet.
+2. **Live AI behaviour is unverified.** Prompts were only exercised against mocked responses.
+   Run a few real complaints and evidence photos with a real `ANTHROPIC_API_KEY` first.
+3. Change the seeded passwords, or do not seed users, on any shared database.
+
+## Known decisions and limitations
+
+- Policy/rule editing is limited to reviewer/admin; manual job triggers likewise.
+- Insight `frequency` is all-time per group; trend compares the last 30 days with the 30 before.
+- Photo subject (item vs outer carton) is set by the evidence judge from image content, not file name.
+- Not built from the original concept doc: 0-3 factor scoring and routing, "approve with edits" /
+  "request more evidence" decisions, PDF policy retrieval with excerpts, guided demo mode.

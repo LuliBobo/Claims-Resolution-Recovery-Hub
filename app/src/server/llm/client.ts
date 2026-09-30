@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { fakeCall } from "./fake";
 
 // The one place Anthropic API calls happen. Every call is a forced tool-use call whose
 // input is validated by a zod schema before anything touches the DB.
@@ -41,6 +42,7 @@ export interface CallJsonOptions<T extends z.ZodType> {
 export async function callClaudeJson<T extends z.ZodType>(
   opts: CallJsonOptions<T>,
 ): Promise<z.infer<T>> {
+  if (process.env.E2E_FAKE_LLM === "1") return fakeCall(opts);
   const anthropic = getClient();
   let response;
   try {
