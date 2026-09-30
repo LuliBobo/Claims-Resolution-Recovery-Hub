@@ -389,3 +389,14 @@ model InsightRecord {
   trendDirection InsightTrend @default(stable)
   createdAt      DateTime     @default(now())
 }
+
+// Output of the weekly report job (replaces Luo's write-only Knowledge Base file).
+model WeeklyReport {
+  id          String   @id @default(uuid())
+  // Monday 00:00 UTC of the reported week; one report per week (regeneration replaces it).
+  weekStart   DateTime @unique
+  weekEnd     DateTime
+  markdown    String
+  generatedAt DateTime @default(now())
+  generatedBy String
+}
