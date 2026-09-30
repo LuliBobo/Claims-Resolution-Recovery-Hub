@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getActor } from "@/lib/session";
 import { actionResolutionProposal } from "@/server/workflows/action-proposal";
 import { regenerateRecoveryDraft } from "@/server/workflows/recovery-draft";
+import { reconcileLegacyCurrentProposal } from "@/server/workflows/reconcile-proposal";
 import { reviewApproval } from "@/server/workflows/review-approval";
 import { sendRecoveryDraft } from "@/server/workflows/send-recovery-draft";
 
@@ -37,4 +38,10 @@ export async function sendRecoveryDraftAction(draftId: string, caseId: string) {
 
 export async function regenerateRecoveryDraftAction(caseId: string) {
   return run(caseId, async () => regenerateRecoveryDraft(await getActor(), caseId));
+}
+
+export async function reconcileProposalAction(caseId: string, _p: string | undefined, fd: FormData) {
+  return run(caseId, async () =>
+    reconcileLegacyCurrentProposal(await getActor(), caseId, String(fd.get("proposalId") ?? ""), String(fd.get("comment") ?? "")),
+  );
 }

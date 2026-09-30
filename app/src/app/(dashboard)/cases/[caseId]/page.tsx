@@ -1,9 +1,14 @@
+import { db } from "@/server/db";
 import { notFound } from "next/navigation";
 import { CaseEditForm } from "@/components/features/case-edit-form";
 import { Button } from "@/components/ui/button";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
 import { markProposalSentAction, regenerateRecoveryDraftAction, sendRecoveryDraftAction } from "@/actions/approvals";
 import { ActionButton } from "@/components/features/action-button";
+import { ReconcileForm } from "@/components/features/reconcile-form";
+import { proposalLabel } from "@/lib/proposal-label";
+import { getActor } from "@/lib/session";
+import { describeCurrent } from "@/server/workflows/proposal-supersession";
 import { RegenerateButton } from "@/components/features/regenerate-button";
 import { getCase } from "@/server/workflows/case-management";
 import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
@@ -15,7 +20,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
   const sp = await props.searchParams;
   const c = await getCase(caseId).catch(() => null);
   if (!c) notFound();
-  const gate = await evaluateGateForCase(c.id);
+  const [gate, current, actor] = await Promise.all([evaluateGateForCase(c.id), describeCurrent(db, c.id), getActor()]);
   const uploadError = typeof sp.uploadError === "string" ? sp.uploadError : undefined;
 
   return (
@@ -74,9 +79,32 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
 
       <section className="flex flex-col gap-2">
         <h2 className="font-medium">Resolution proposals</h2>
-        <RegenerateButton caseId={c.id} />
-        {c.resolutionProposals.map((p) => (
-          <div key={p.id} className="rounded-md border border-border p-3 text-sm">
+        {current.needsReconciliation && (
+          <div className="rounded-md border border-border bg-muted p-3 text-sm">
+            <p className="mb-2 font-medium">
+              This case has {current.liveIds.length} live proposals and no current one. Sending is blocked until an admin reconciles it.
+            </p>
+            {actor?.role === "admin" ? (
+              <ReconcileForm
+                caseId={c.id}
+                proposals={c.resolutionProposals
+                  .filter((p) => current.liveIds.includes(p.id))
+                  .map((p) => ({ id: p.id, label: `${p.recommendation} (${p.status}, ${p.createdAt.toISOString().slice(0, 10)})` }))}
+              />
+            ) : (
+              <p className="text-muted-foreground">Only an admin can reconcile it.</p>
+            )}
+          </div>
+        )}
+        {!current.needsReconciliation && <RegenerateButton caseId={c.id} />}
+        {c.resolutionProposals.map((p) => {
+          const label = proposalLabel(p, current.currentId);
+          return (
+          <div key={p.id} className={`rounded-md border p-3 text-sm ${label.badge === "Current" ? "border-primary" : "border-border"} ${label.badge === "Superseded" ? "opacity-70" : ""}`}>
+            {label.badge && (
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{label.badge}</div>
+            )}
+            {label.badge === "Superseded" && <div className="mb-1 text-xs text-muted-foreground">{label.text}</div>}
             <div className="font-medium">
               {p.recommendation} <span className="font-normal text-muted-foreground">({p.status})</span>
               {p.evidenceGateApplied && <span className="ml-2 text-destructive">evidence gate applied</span>}
@@ -86,7 +114,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
               Confidence {p.confidence != null ? Math.round(p.confidence * 100) + "%" : "n/a"}. Policy: {p.policySource ?? "none"}. Approval:{" "}
               {p.approvals.map((a) => a.decision).join(", ") || "none"}
             </p>
-            {p.status === "approved" && (
+            {p.status === "approved" && p.id === current.currentId && (
               <div className="mt-2">
                 <ActionButton action={markProposalSentAction.bind(null, p.id, c.id)} label="Mark as sent (manual attestation)" />
               </div>
@@ -98,7 +126,8 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
               </details>
             )}
           </div>
-        ))}
+          );
+        })}
         {c.resolutionProposals.length === 0 && <p className="text-sm text-muted-foreground">No proposals yet.</p>}
       </section>
 

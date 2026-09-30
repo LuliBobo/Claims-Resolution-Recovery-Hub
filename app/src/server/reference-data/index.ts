@@ -68,8 +68,8 @@ export async function setRuleActive(actor: Actor | null, id: string, active: boo
  * Matching is by value equality on triggerType (application-level, not an FK).
  * Used by proposal generation (M4).
  */
-export async function findActiveRulesForCaseType(caseType: RuleTriggerType) {
-  return db.rule.findMany({
+export async function findActiveRulesForCaseType(caseType: RuleTriggerType, client: Pick<typeof db, "rule"> = db) {
+  return client.rule.findMany({
     where: {
       activeStatus: true,
       triggerType: caseType,

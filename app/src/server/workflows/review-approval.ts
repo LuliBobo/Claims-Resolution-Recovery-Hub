@@ -1,6 +1,7 @@
 import { REVIEW_ROLES, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
+import { lockCase } from "./proposal-supersession";
 
 export class ApprovalError extends Error {
   constructor(message: string) {
@@ -20,7 +21,10 @@ export async function reviewApproval(
   comment?: string,
 ) {
   const user = requireRole(actor, ...REVIEW_ROLES);
+  const head = await db.humanApproval.findUniqueOrThrow({ where: { id: approvalId }, select: { linkedCaseId: true } });
   return db.$transaction(async (tx) => {
+    // Serialize with regenerate/send/reconcile on the case row, then re-read under the lock.
+    await lockCase(tx, head.linkedCaseId);
     const approval = await tx.humanApproval.findUniqueOrThrow({ where: { id: approvalId } });
     if (approval.decision === "superseded") {
       throw new ApprovalError("This approval was superseded by a newer proposal and can no longer be reviewed");
