@@ -48,8 +48,13 @@ async function seedPoliciesAndRules() {
 async function main() {
   await seedUsers();
   await seedPoliciesAndRules();
-  // M8: Orders/Shipments/Cases/Attachments from CSVs, then
-  // proposals/approvals/drafts/audit events driven through the real workflow functions.
+  if (!process.env.SEED_SKIP_SAMPLES) {
+    // Loaded lazily: this pulls in the app's workflow code and its own Prisma client.
+    const { seedSampleData } = await import("../src/server/seed/sample-data");
+    const r = await seedSampleData();
+    console.log(`Sample data: ${r.cases} cases created, ${r.skippedExisting} already present, ${r.attachments} attachments (${r.skippedMissingEvidence} "missing" rows skipped).`);
+    for (const w of r.warnings) console.warn(`  warning: ${w}`);
+  }
 }
 
 main()

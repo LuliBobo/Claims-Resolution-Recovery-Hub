@@ -19,17 +19,27 @@ export class RecoveryError extends Error {
   }
 }
 
+/** Damaged and missing deliveries are claimed from the carrier; everything else from the supplier. */
+export function defaultCounterpartyType(caseType: string): "carrier" | "supplier" {
+  return caseType === "damaged_delivery" || caseType === "missing_item" ? "carrier" : "supplier";
+}
+
 /**
- * Creates a recovery draft with its own pending HumanApproval. Damaged deliveries are
- * claimed from the carrier; other case types from the order's supplier.
+ * Creates a recovery draft with its own pending HumanApproval. The counterparty follows
+ * defaultCounterpartyType unless `counterpartyType` is passed explicitly.
  * `actorLabel` is for the audit trail only; authorization is the caller's job.
  */
-export async function generateRecoveryDraft(actorLabel: string, caseId: string, deps: RecoveryDeps = defaultDeps) {
+export async function generateRecoveryDraft(
+  actorLabel: string,
+  caseId: string,
+  deps: RecoveryDeps = defaultDeps,
+  counterpartyType?: "carrier" | "supplier",
+) {
   const c = await db.customerCase.findUniqueOrThrow({
     where: { id: caseId },
     include: { order: true, shipment: true, attachments: true },
   });
-  const carrier = c.caseType === "damaged_delivery";
+  const carrier = (counterpartyType ?? defaultCounterpartyType(c.caseType)) === "carrier";
   const counterpartyName = carrier ? c.shipment?.carrier : c.order?.supplier;
   if (!counterpartyName) {
     throw new RecoveryError(
