@@ -1,23 +1,22 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import type { Prisma } from "@/generated/prisma/client";
+import { db } from "@/server/db";
 
-// Local-disk blob storage behind a two-function interface. The DB stores only the opaque
-// key. Swap the bodies for object storage (S3, Vercel Blob) before deploying somewhere
-// with an ephemeral filesystem (M8). The turbopackIgnore markers stop the bundler from
-// tracing the whole project because the directory is configured at runtime.
+// Attachment byte storage. Bytes live in Postgres (AttachmentBlob), written in the SAME
+// transaction as the Attachment row, so there are never orphaned files, and deleting an
+// attachment or case deletes its bytes. Access goes through the authenticated download route.
+// This is a two-function interface on purpose: to move to object storage (S3, Vercel Blob),
+// change only these bodies. `storageRef` on Attachment stays an opaque reference string.
 
-const root = () => path.resolve(/*turbopackIgnore: true*/ process.env.UPLOAD_DIR ?? ".uploads");
+type Tx = Prisma.TransactionClient;
 
-export async function putBlob(bytes: Uint8Array): Promise<string> {
-  const key = randomUUID();
-  const dir = root();
-  await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
-  await writeFile(/*turbopackIgnore: true*/ path.join(dir, key), bytes);
-  return key;
+export const storageRefFor = (attachmentId: string) => `db://${attachmentId}`;
+
+export async function storeAttachmentBytes(tx: Tx, attachmentId: string, bytes: Uint8Array) {
+  await tx.attachmentBlob.create({ data: { attachmentId, bytes: Uint8Array.from(bytes) } });
 }
 
-export async function getBlob(key: string): Promise<Buffer> {
-  if (!/^[0-9a-f-]{36}$/.test(key)) throw new Error("Invalid blob key");
-  return readFile(/*turbopackIgnore: true*/ path.join(root(), key));
+/** Returns null when no bytes exist (e.g. synthetic seed attachments, which have no file). */
+export async function loadAttachmentBytes(attachmentId: string, client: Tx | typeof db = db): Promise<Uint8Array | null> {
+  const row = await client.attachmentBlob.findUnique({ where: { attachmentId }, select: { bytes: true } });
+  return row ? new Uint8Array(row.bytes) : null;
 }

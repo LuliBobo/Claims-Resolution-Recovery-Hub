@@ -26,7 +26,6 @@ export default defineConfig({
       E2E_FAKE_LLM: "1",
       AUTH_SECRET: "e2e-only-secret",
       AUTH_TRUST_HOST: "true",
-      UPLOAD_DIR: ".uploads-e2e",
     },
   },
 });

@@ -82,6 +82,18 @@ test("damaged delivery: from complaint to sent recovery claim", async ({ browser
   await expect(agent.getByText("4/15")).toBeVisible();
   await expect(agent.getByText("Quick review").first()).toBeVisible();
 
+  // Stored files come back byte for byte, behind login, as the sniffed type, downloading (not rendering).
+  const href = await agent.getByRole("link", { name: "test_e2e_shipping_label.png" }).getAttribute("href");
+  const file = await agent.request.get(href!);
+  expect(file.status()).toBe(200);
+  expect(Buffer.compare(await file.body(), PNG)).toBe(0);
+  expect(file.headers()["content-type"]).toBe("image/png");
+  expect(file.headers()["content-disposition"]).toContain("attachment");
+  expect(file.headers()["x-content-type-options"]).toBe("nosniff");
+  expect((await agent.request.get(`${href}?inline=1`)).headers()["content-disposition"]).toContain("inline");
+  const anonymous = await (await browser.newContext()).request.get(href!);
+  expect(anonymous.status()).toBe(401);
+
   // 4. Generate a new proposal: gate no longer applies, the old one is superseded.
   await agent.getByRole("button", { name: "Generate proposal" }).click();
   await expect(agent.getByText("Arrange Replacement Shipment").first()).toBeVisible();

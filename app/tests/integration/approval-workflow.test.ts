@@ -1,7 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { AuthError, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { CARRIER_CLAIMS_SOP_NAME } from "@/server/evidence/carrier-claims-gate";
@@ -42,7 +39,6 @@ const caseIds: string[] = [];
 let policyId: string, ruleId: string, orderId: string, shipmentId: string;
 
 beforeAll(async () => {
-  process.env.UPLOAD_DIR = await mkdtemp(path.join(tmpdir(), "uploads-"));
   policyId = (await db.policyDocument.create({ data: { name: CARRIER_CLAIMS_SOP_NAME, documentType: "carrier_agreement" } })).id;
   ruleId = (await db.rule.create({ data: { ruleName: "t", triggerType: "damaged_delivery", linkedPolicyDocumentId: policyId } })).id;
   orderId = (await db.order.create({ data: { orderDate: new Date(), salesChannel: "web", customerName: "T", sku: "S", productName: "Vase", quantity: 1, orderValue: 40 } })).id;

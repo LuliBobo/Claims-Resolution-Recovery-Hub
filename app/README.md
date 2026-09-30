@@ -50,9 +50,14 @@ Environment: `DATABASE_URL`, `AUTH_SECRET`, `ANTHROPIC_API_KEY`, `CRON_SECRET`
 
 Open blockers before a real deployment:
 
-1. **Attachment storage.** `src/server/storage.ts` writes to local disk, which does not persist on
-   Vercel. Swap `putBlob`/`getBlob` for object storage (keeping the two-function interface).
-   There is also no attachment download route yet.
+1. **Attachment storage** is done: file bytes live in Postgres (`AttachmentBlob`), written in the same
+   transaction as the attachment row and deleted with it, and served only through the authenticated
+   `/api/attachments/{id}/download` route (sniffed content type, `nosniff`, sandboxing CSP, images may
+   render inline with `?inline=1`, everything else downloads). To move to S3 or Vercel Blob, change only
+   the two functions in `src/server/storage.ts`. Upload size defaults to 4 MB (`MAX_UPLOAD_MB`): serverless
+   hosts cap request bodies (Vercel documents about 4.5 MB for functions, check your plan) and the Claude
+   API limits image size, so a larger photo could store fine but fail AI judging and stay `pending_review`.
+   Database size and backups now include attachments.
 2. **Live AI behaviour is unverified.** Prompts were only exercised against mocked responses.
    Run a few real complaints and evidence photos with a real `ANTHROPIC_API_KEY` first.
 3. Change the seeded passwords, or do not seed users, on any shared database.

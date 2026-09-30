@@ -293,6 +293,8 @@ model Attachment {
 
   case CustomerCase @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
 
+  blob AttachmentBlob?
+
   @@index([linkedCaseId])
 }
 
@@ -401,4 +403,14 @@ model WeeklyReport {
   markdown    String
   generatedAt DateTime @default(now())
   generatedBy String
+}
+
+// File bytes, in their own table so listing attachments never loads them. Keyed by the
+// attachment, so deleting an attachment (or its case) deletes the bytes too.
+model AttachmentBlob {
+  attachmentId String   @id
+  bytes        Bytes
+  createdAt    DateTime @default(now())
+
+  attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
 }

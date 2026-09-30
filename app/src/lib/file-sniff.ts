@@ -40,4 +40,6 @@ export const ALLOWED_UPLOAD_TYPES = new Set([
   "text/plain",
 ]);
 
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Default 4 MB: serverless hosts cap request bodies (Vercel documents about 4.5 MB for
+// functions; verify for your plan) and the Claude API limits image size. Override with MAX_UPLOAD_MB.
+export const MAX_UPLOAD_BYTES = Math.floor(Number(process.env.MAX_UPLOAD_MB ?? 4) * 1024 * 1024);

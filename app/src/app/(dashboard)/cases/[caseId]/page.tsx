@@ -204,7 +204,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         <ul className="text-sm">
           {c.attachments.map((a) => (
             <li key={a.id} className="border-t border-border py-1">
-              {a.fileName} - {a.attachmentCategory}{a.photoSubject ? ` (${a.photoSubject})` : ""}{a.sniffedContentType ? ` - ${a.sniffedContentType}` : ""} - evidence: {a.evidenceStatus}{a.aiNotes ? ` - ${a.aiNotes}` : ""}
+              <a className="underline" href={`/api/attachments/${a.id}/download`}>{a.fileName}</a> - {a.attachmentCategory}{a.photoSubject ? ` (${a.photoSubject})` : ""}{a.sniffedContentType ? ` - ${a.sniffedContentType}` : ""} - evidence: {a.evidenceStatus}{a.aiNotes ? ` - ${a.aiNotes}` : ""}
               {a.contentTypeMismatch && (
                 <span className="text-destructive"> (declared {a.declaredContentType}, content differs)</span>
               )}

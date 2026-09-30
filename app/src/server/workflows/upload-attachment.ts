@@ -1,7 +1,8 @@
 import { ANY_ROLE, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
-import { putBlob } from "@/server/storage";
+import { randomUUID } from "node:crypto";
+import { storageRefFor, storeAttachmentBytes } from "@/server/storage";
 import { ALLOWED_UPLOAD_TYPES, MAX_UPLOAD_BYTES, sniffContentType } from "@/lib/file-sniff";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
 import { assessObservation, type AttachmentObservation } from "@/server/evidence/assess";
@@ -38,7 +39,7 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput, 
     throw new UploadError("Unknown attachment category");
   }
   if (input.bytes.length === 0) throw new UploadError("File is empty");
-  if (input.bytes.length > MAX_UPLOAD_BYTES) throw new UploadError("File exceeds the 10 MB limit");
+  if (input.bytes.length > MAX_UPLOAD_BYTES) throw new UploadError(`File exceeds the ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB limit`);
 
   const sniffed = sniffContentType(input.bytes);
   if (!sniffed || !ALLOWED_UPLOAD_TYPES.has(sniffed)) {
@@ -48,11 +49,13 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput, 
   const mismatch = declared !== sniffed;
 
   await db.customerCase.findUniqueOrThrow({ where: { id: input.caseId }, select: { id: true } });
-  const storageRef = await putBlob(input.bytes);
-
   const created = await db.$transaction(async (tx) => {
+    // Row and bytes commit together or not at all.
+    const id = randomUUID();
     const attachment = await tx.attachment.create({
       data: {
+        id,
+        storageRef: storageRefFor(id),
         linkedCaseId: input.caseId,
         // Keep only the base name; the client controls this string.
         fileName: input.fileName.split(/[\\/]/).pop() || "upload",
@@ -60,9 +63,9 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput, 
         sniffedContentType: sniffed,
         contentTypeMismatch: mismatch,
         attachmentCategory: input.category as (typeof ATTACHMENT_CATEGORIES)[number],
-        storageRef,
       },
     });
+    await storeAttachmentBytes(tx, id, input.bytes);
     await logAuditEvent(
       {
         caseId: input.caseId,

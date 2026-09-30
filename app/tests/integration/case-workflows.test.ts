@@ -1,13 +1,12 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { afterAll, describe, expect, it } from "vitest";
 import type { Actor } from "@/server/auth";
 import { AuthError } from "@/server/auth";
 import { db } from "@/server/db";
 import { createCase, type IntakeLlm } from "@/server/workflows/case-intake";
 import { updateCase } from "@/server/workflows/case-management";
 import { UploadError, uploadAttachment } from "@/server/workflows/upload-attachment";
+import { MAX_UPLOAD_BYTES } from "@/lib/file-sniff";
+import { loadAttachmentBytes, storageRefFor, storeAttachmentBytes } from "@/server/storage";
 
 const agent: Actor = { id: "u1", email: "agent@test.io", name: "A", role: "agent" };
 const complaint = { source: "email", customerName: "Test Customer", complaintText: "Tovar prišiel rozbitý." };
@@ -31,9 +30,6 @@ const proposalOk = {
 const proposalDown = { generate: async () => { throw new Error("down"); } };
 
 const createdCaseIds: string[] = [];
-beforeAll(async () => {
-  process.env.UPLOAD_DIR = await mkdtemp(path.join(tmpdir(), "uploads-"));
-});
 afterAll(async () => {
   await db.customerCase.deleteMany({ where: { id: { in: createdCaseIds } } });
   await db.$disconnect();
@@ -104,6 +100,54 @@ describe("uploadAttachment", () => {
     await expect(
       uploadAttachment(agent, { caseId: c.id, fileName: "x.jpg", declaredContentType: "image/jpeg", category: "photo_evidence", bytes: exe }),
     ).rejects.toBeInstanceOf(UploadError);
+    expect(await db.attachment.count({ where: { linkedCaseId: c.id } })).toBe(0);
+  });
+});
+
+describe("attachment byte storage", () => {
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9, 8, 7, 6]);
+  const noJudge = { observe: async () => { throw new Error("skip"); } };
+
+  it("stores the bytes with the attachment and returns them unchanged", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    const a = await uploadAttachment(agent, { caseId: c.id, fileName: "a.png", declaredContentType: "image/png", category: "photo_evidence", bytes: png }, noJudge);
+    expect(a.storageRef).toBe(`db://${a.id}`);
+    expect(Array.from((await loadAttachmentBytes(a.id))!)).toEqual(Array.from(png));
+    expect(await loadAttachmentBytes("00000000-0000-0000-0000-000000000000")).toBeNull();
+  });
+
+  it("row and bytes are atomic: a failure after the row is created leaves neither", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    const id = "11111111-1111-1111-1111-111111111111";
+    await expect(
+      db.$transaction(async (tx) => {
+        await tx.attachment.create({ data: { id, linkedCaseId: c.id, fileName: "x", declaredContentType: "image/png", storageRef: storageRefFor(id) } });
+        await storeAttachmentBytes(tx, id, png);
+        throw new Error("boom");
+      }),
+    ).rejects.toThrow("boom");
+    expect(await db.attachment.count({ where: { id } })).toBe(0);
+    expect(await loadAttachmentBytes(id)).toBeNull();
+  });
+
+  it("deleting the case deletes the attachment bytes", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    const a = await uploadAttachment(agent, { caseId: c.id, fileName: "a.png", declaredContentType: "image/png", category: "other", bytes: png }, noJudge);
+    expect(await db.attachmentBlob.count({ where: { attachmentId: a.id } })).toBe(1);
+    await db.customerCase.delete({ where: { id: c.id } });
+    expect(await db.attachmentBlob.count({ where: { attachmentId: a.id } })).toBe(0);
+  });
+
+  it("rejects files over the size limit and stores nothing", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    const big = new Uint8Array(MAX_UPLOAD_BYTES + 1);
+    big.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    await expect(
+      uploadAttachment(agent, { caseId: c.id, fileName: "big.png", declaredContentType: "image/png", category: "other", bytes: big }, noJudge),
+    ).rejects.toThrow(/MB limit/);
     expect(await db.attachment.count({ where: { linkedCaseId: c.id } })).toBe(0);
   });
 });

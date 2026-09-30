@@ -1,7 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import type { Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { CARRIER_CLAIMS_SOP_NAME } from "@/server/evidence/carrier-claims-gate";
@@ -44,7 +41,6 @@ let policyId: string;
 let ruleId: string;
 
 beforeAll(async () => {
-  process.env.UPLOAD_DIR = await mkdtemp(path.join(tmpdir(), "uploads-"));
   const policy = await db.policyDocument.create({ data: { name: CARRIER_CLAIMS_SOP_NAME, documentType: "carrier_agreement", version: "1.0" } });
   policyId = policy.id;
   ruleId = (await db.rule.create({ data: { ruleName: "test damaged", triggerType: "damaged_delivery", linkedPolicyDocumentId: policyId } })).id;

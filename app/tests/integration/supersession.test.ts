@@ -1,7 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { afterAll, describe, expect, it } from "vitest";
 import { AuthError, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import type { GeneratedProposal } from "@/server/llm/generate-proposal";
@@ -35,9 +32,6 @@ const llm = {
 };
 
 const caseIds: string[] = [];
-beforeAll(async () => {
-  process.env.UPLOAD_DIR = await mkdtemp(path.join(tmpdir(), "uploads-"));
-});
 afterAll(async () => {
   await db.customerCase.deleteMany({ where: { id: { in: caseIds } } });
   await db.$disconnect();
