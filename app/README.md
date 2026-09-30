@@ -62,5 +62,10 @@ Open blockers before a real deployment:
 - Policy/rule editing is limited to reviewer/admin; manual job triggers likewise.
 - Insight `frequency` is all-time per group; trend compares the last 30 days with the 30 before.
 - Photo subject (item vs outer carton) is set by the evidence judge from image content, not file name.
-- Not built from the original concept doc: 0-3 factor scoring and routing, "approve with edits" /
-  "request more evidence" decisions, PDF policy retrieval with excerpts, guided demo mode.
+- Workflow scoring (concept Prompt 12) is implemented in `src/server/scoring/`: five factors 0-3, total
+  0-15, four routes. It is pure, recomputed from current data on every read, and shown on the case page
+  and the approvals queue. Derivations and thresholds are prototype assumptions (documented in
+  `workflow-score.ts`). Reviewers/admins can override a factor with a reason (audited). The only
+  enforcement: on the "escalate" route (11-15) an agent cannot move a case to resolved/closed.
+- Not built from the original concept doc: "approve with edits" / "request more evidence" decisions,
+  PDF policy retrieval with excerpts, guided demo mode.

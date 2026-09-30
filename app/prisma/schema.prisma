@@ -251,6 +251,8 @@ model CustomerCase {
   needsManualTriage           Boolean      @default(false)
   // 0..1, as reported by the classifier; null when classification was manual or failed.
   classificationConfidence    Float?
+  // Operator overrides of workflow score factors: { factorKey: { score, reason, by, at } }.
+  scoreOverrides              Json?
   // Single stored source of truth for "which proposal is current" (supersession Part B.2).
   currentResolutionProposalId String?      @unique
 

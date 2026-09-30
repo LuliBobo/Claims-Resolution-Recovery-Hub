@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
 import { markProposalSentAction, regenerateRecoveryDraftAction, sendRecoveryDraftAction } from "@/actions/approvals";
 import { ActionButton } from "@/components/features/action-button";
+import { ScoreOverrideForm } from "@/components/features/score-override-form";
+import { getWorkflowScore } from "@/server/scoring";
+import { REVIEW_ROLES } from "@/server/auth";
 import { ReconcileForm } from "@/components/features/reconcile-form";
 import { proposalLabel } from "@/lib/proposal-label";
 import { getActor } from "@/lib/session";
@@ -20,7 +23,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
   const sp = await props.searchParams;
   const c = await getCase(caseId).catch(() => null);
   if (!c) notFound();
-  const [gate, current, actor] = await Promise.all([evaluateGateForCase(c.id), describeCurrent(db, c.id), getActor()]);
+  const [gate, current, actor, score] = await Promise.all([evaluateGateForCase(c.id), describeCurrent(db, c.id), getActor(), getWorkflowScore(c.id)]);
   const uploadError = typeof sp.uploadError === "string" ? sp.uploadError : undefined;
 
   return (
@@ -60,6 +63,38 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           assignedReviewer={c.assignedReviewer}
           recoveryNeeded={c.recoveryNeeded}
         />
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-medium">Workflow score</h2>
+        <p className="text-sm">
+          <span className="text-lg font-semibold">{score.total}/15</span>: {score.routeLabel}
+        </p>
+        <table className="w-full text-sm">
+          <thead className="text-left text-muted-foreground">
+            <tr><th className="py-1">Factor</th><th>Score</th><th>Level</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            {score.factors.map((f) => (
+              <tr key={f.key} className="border-t border-border align-top">
+                <td className="py-1">{f.label}</td>
+                <td>{f.score}{f.override && ` (derived ${f.derivedScore})`}</td>
+                <td>{f.level}</td>
+                <td>{f.reason}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-xs text-muted-foreground">
+          Prototype workflow assumptions, not legal or regulatory standards. Thresholds: 0-4 quick review, 5-7 request
+          evidence or supervisor check, 8-10 human approval required, 11-15 escalate with no automatic closure (agents
+          cannot close such a case). The score is recomputed from current data on every view; the AI cannot change it.
+        </p>
+        {actor && REVIEW_ROLES.includes(actor.role) ? (
+          <ScoreOverrideForm caseId={c.id} />
+        ) : (
+          <p className="text-xs text-muted-foreground">Only a reviewer or admin can override a factor.</p>
+        )}
       </section>
 
       {gate.applies && (

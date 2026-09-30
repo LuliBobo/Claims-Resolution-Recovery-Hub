@@ -3,6 +3,7 @@ import { ANY_ROLE, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
 import { caseFilterInput, caseUpdateInput } from "@/lib/validation/case";
+import { getWorkflowScore } from "@/server/scoring";
 
 export async function listCases(raw: unknown = {}) {
   const f = caseFilterInput.parse(raw);
@@ -45,6 +46,13 @@ export async function updateCase(actor: Actor | null, id: string, raw: unknown) 
   const input = caseUpdateInput.parse(raw);
   return db.$transaction(async (tx) => {
     const before = await tx.customerCase.findUniqueOrThrow({ where: { id } });
+    // Escalate route (score 11-15): closing the case needs a reviewer or admin, never an agent.
+    if ((input.status === "resolved" || input.status === "closed") && before.status !== input.status && user.role === "agent") {
+      const score = await getWorkflowScore(id, tx);
+      if (score.route === "escalate_no_auto_closure") {
+        throw new Error(`Workflow score ${score.total}/15 routes this case to "${score.routeLabel}"; a reviewer or admin must close it`);
+      }
+    }
     const after = await tx.customerCase.update({
       where: { id },
       data: {

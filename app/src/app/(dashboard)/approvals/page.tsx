@@ -3,12 +3,14 @@ import { ReviewForm } from "@/components/features/review-form";
 import { getActor } from "@/lib/session";
 import { REVIEW_ROLES } from "@/server/auth";
 import { listCasesNeedingReconciliation } from "@/server/workflows/proposal-supersession";
+import { getWorkflowScore } from "@/server/scoring";
 import { listPendingApprovals } from "@/server/workflows/review-approval";
 
 export const dynamic = "force-dynamic";
 
 export default async function ApprovalsPage() {
   const [actor, approvals, needReconcile] = await Promise.all([getActor(), listPendingApprovals(), listCasesNeedingReconciliation()]);
+  const scores = new Map(await Promise.all([...new Set(approvals.map((a) => a.linkedCaseId))].map(async (id) => [id, await getWorkflowScore(id)] as const)));
   const canReview = !!actor && REVIEW_ROLES.includes(actor.role);
   return (
     <div className="flex max-w-4xl flex-col gap-4">
@@ -33,7 +35,10 @@ export default async function ApprovalsPage() {
             <Link className="font-medium underline" href={`/cases/${a.linkedCaseId}`}>
               {a.case.customerName}
             </Link>
-            <span className="text-muted-foreground">{a.approvalType === "resolution_proposal" ? "Resolution proposal" : "Recovery draft"}</span>
+            <span className="text-muted-foreground">
+              Score {scores.get(a.linkedCaseId)?.total}/15: {scores.get(a.linkedCaseId)?.routeLabel} |{" "}
+              {a.approvalType === "resolution_proposal" ? "Resolution proposal" : "Recovery draft"}
+            </span>
           </div>
           {a.resolutionProposal && (
             <div>

@@ -64,6 +64,10 @@ test("damaged delivery: from complaint to sent recovery claim", async ({ browser
   await expect(agent.getByText("Current", { exact: true })).toBeVisible();
   await expect(agent.getByText("awaiting_approval").first()).toBeVisible();
 
+  // Workflow score: no evidence (3), explicit policy (0), medium priority (1), order 40 (0), recovery w/o evidence (2) = 6
+  await expect(agent.getByText("6/15")).toBeVisible();
+  await expect(agent.getByText("Request evidence or supervisor check").first()).toBeVisible();
+
   // 3. Upload the three evidence files; the checklist flips immediately.
   await upload(agent, "test_e2e_damaged_vase_broken.png", "photo_evidence");
   await upload(agent, "test_e2e_outer_carton_box.png", "photo_evidence");
@@ -72,6 +76,11 @@ test("damaged delivery: from complaint to sent recovery claim", async ({ browser
   await expect(agent.getByText("[x] Shipping label photo")).toBeVisible();
   await expect(agent.getByText("[x] Damaged item photo")).toBeVisible();
   await expect(agent.getByText("[x] Outer carton photo")).toBeVisible();
+
+  // The score follows the evidence with no regenerate: evidence now complete (0), recovery strong (3) = 4
+  await agent.reload();
+  await expect(agent.getByText("4/15")).toBeVisible();
+  await expect(agent.getByText("Quick review").first()).toBeVisible();
 
   // 4. Generate a new proposal: gate no longer applies, the old one is superseded.
   await agent.getByRole("button", { name: "Generate proposal" }).click();
