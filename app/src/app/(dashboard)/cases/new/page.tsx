@@ -35,6 +35,9 @@ export default async function NewCasePage() {
           label="Linked shipment"
           options={shipments.map((s) => ({ value: s.id, label: `${s.carrier} ${s.trackingNumber}` }))}
         />
+        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+          <input type="checkbox" name="recoveryNeeded" /> Recovery needed (draft a carrier or supplier claim)
+        </label>
         <label className="flex flex-col gap-1 text-sm sm:col-span-2">
           Complaint text
           <textarea name="complaintText" required rows={6} className="rounded-md border border-input bg-background p-3" />

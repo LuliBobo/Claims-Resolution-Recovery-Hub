@@ -23,6 +23,10 @@ export const caseCreateInput = z.object({
   priority: z.preprocess(blankToUndefined, z.enum(PRIORITIES).optional()),
   linkedOrderId: optionalText,
   linkedShipmentId: optionalText,
+  recoveryNeeded: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v) => v === true || v === "on" || v === "true"),
 });
 
 export const caseUpdateInput = z.object({

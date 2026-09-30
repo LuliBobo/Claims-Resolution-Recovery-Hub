@@ -5,6 +5,7 @@ import { classifyComplaint, type ClassifyResult } from "@/server/llm/classify";
 import { summarizeComplaint, type TranslateResult } from "@/server/llm/translate";
 import { caseCreateInput } from "@/lib/validation/case";
 import { generateResolutionProposal, type ProposalDeps } from "./proposal-generation";
+import { generateRecoveryDraft, type RecoveryDeps } from "./recovery-draft";
 
 // Injectable so tests can run intake without the network.
 export interface IntakeLlm {
@@ -25,6 +26,7 @@ export async function createCase(
   raw: unknown,
   llm: IntakeLlm = defaultLlm,
   proposalDeps?: ProposalDeps,
+  recoveryDeps?: RecoveryDeps,
 ) {
   const user = requireRole(actor, ...ANY_ROLE);
   const input = caseCreateInput.parse(raw);
@@ -73,6 +75,7 @@ export async function createCase(
         linkedOrderId: input.linkedOrderId,
         linkedShipmentId: input.linkedShipmentId,
         needsManualTriage,
+        recoveryNeeded: input.recoveryNeeded,
         classificationConfidence,
       },
     });
@@ -100,6 +103,19 @@ export async function createCase(
       action: "llm_step_failed",
       notes: `proposal generation failed: ${describe(e)}`,
     });
+  }
+  if (input.recoveryNeeded) {
+    try {
+      await generateRecoveryDraft(user.email, created.id, recoveryDeps);
+    } catch (e) {
+      await db.customerCase.update({ where: { id: created.id }, data: { needsManualTriage: true } });
+      await logAuditEvent({
+        caseId: created.id,
+        actor: "system",
+        action: "llm_step_failed",
+        notes: `recovery draft generation failed: ${describe(e)}`,
+      });
+    }
   }
   return db.customerCase.findUniqueOrThrow({ where: { id: created.id } });
 }

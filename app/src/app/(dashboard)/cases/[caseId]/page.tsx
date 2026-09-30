@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { CaseEditForm } from "@/components/features/case-edit-form";
 import { Button } from "@/components/ui/button";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
+import { markProposalSentAction, regenerateRecoveryDraftAction, sendRecoveryDraftAction } from "@/actions/approvals";
+import { ActionButton } from "@/components/features/action-button";
 import { RegenerateButton } from "@/components/features/regenerate-button";
 import { getCase } from "@/server/workflows/case-management";
 import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
@@ -84,6 +86,11 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
               Confidence {p.confidence != null ? Math.round(p.confidence * 100) + "%" : "n/a"}. Policy: {p.policySource ?? "none"}. Approval:{" "}
               {p.approvals.map((a) => a.decision).join(", ") || "none"}
             </p>
+            {p.status === "approved" && (
+              <div className="mt-2">
+                <ActionButton action={markProposalSentAction.bind(null, p.id, c.id)} label="Mark as sent (manual attestation)" />
+              </div>
+            )}
             {p.customerReplyDraft && (
               <details className="mt-1">
                 <summary className="cursor-pointer">Customer reply draft ({c.customerLanguage})</summary>
@@ -93,6 +100,28 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           </div>
         ))}
         {c.resolutionProposals.length === 0 && <p className="text-sm text-muted-foreground">No proposals yet.</p>}
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-medium">Recovery drafts</h2>
+        <ActionButton action={regenerateRecoveryDraftAction.bind(null, c.id)} label="Generate recovery draft" pendingLabel="Generating..." />
+        {c.recoveryDrafts.map((d) => (
+          <div key={d.id} className="rounded-md border border-border p-3 text-sm">
+            <div className="font-medium">
+              {d.claimType} to {d.counterpartyName} ({d.counterpartyType}){" "}
+              <span className="font-normal text-muted-foreground">({d.status})</span>
+              {d.estimatedRecoverableValue != null && `, est. ${d.estimatedRecoverableValue.toString()}`}
+            </div>
+            <p className="whitespace-pre-wrap">{d.draftText}</p>
+            <p className="text-muted-foreground">Approval: {d.approvals.map((a) => a.decision).join(", ") || "none"}</p>
+            {d.status === "approved" && (
+              <div className="mt-2">
+                <ActionButton action={sendRecoveryDraftAction.bind(null, d.id, c.id)} label="Mark as sent (manual attestation)" />
+              </div>
+            )}
+          </div>
+        ))}
+        {c.recoveryDrafts.length === 0 && <p className="text-sm text-muted-foreground">No recovery drafts yet.</p>}
       </section>
 
       <section className="flex flex-col gap-2">
