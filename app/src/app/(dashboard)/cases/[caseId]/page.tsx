@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { CaseEditForm } from "@/components/features/case-edit-form";
 import { Button } from "@/components/ui/button";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
+import { RegenerateButton } from "@/components/features/regenerate-button";
 import { getCase } from "@/server/workflows/case-management";
+import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
   const sp = await props.searchParams;
   const c = await getCase(caseId).catch(() => null);
   if (!c) notFound();
+  const gate = await evaluateGateForCase(c.id);
   const uploadError = typeof sp.uploadError === "string" ? sp.uploadError : undefined;
 
   return (
@@ -18,7 +21,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
       <div>
         <h1 className="text-xl font-semibold">{c.customerName}</h1>
         <p className="text-sm text-muted-foreground">
-          {c.caseType} / {c.priority} / {c.status} / via {c.source} / language {c.customerLanguage}
+          {c.caseType}{c.classificationConfidence != null && ` (confidence ${Math.round(c.classificationConfidence * 100)}%)`} / {c.priority} / {c.status} / via {c.source} / language {c.customerLanguage}
         </p>
         {c.needsManualTriage && (
           <p className="mt-2 rounded-md border border-border bg-muted p-2 text-sm">
@@ -52,6 +55,46 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         />
       </section>
 
+      {gate.applies && (
+        <section className="flex flex-col gap-2">
+          <h2 className="font-medium">Carrier claim evidence checklist</h2>
+          <ul className="text-sm">
+            <li>{gate.checklist.shippingLabelPhoto ? "[x]" : "[ ]"} Shipping label photo</li>
+            <li>{gate.checklist.damagedItemPhoto ? "[x]" : "[ ]"} Damaged item photo</li>
+            <li>{gate.checklist.outerCartonPhoto ? "[x]" : "[ ]"} Outer carton photo</li>
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            Recomputed from current attachments on every view. Only attachments with evidence status
+            &quot;sufficient&quot; count. The stored proposal updates when you generate a new one.
+          </p>
+        </section>
+      )}
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-medium">Resolution proposals</h2>
+        <RegenerateButton caseId={c.id} />
+        {c.resolutionProposals.map((p) => (
+          <div key={p.id} className="rounded-md border border-border p-3 text-sm">
+            <div className="font-medium">
+              {p.recommendation} <span className="font-normal text-muted-foreground">({p.status})</span>
+              {p.evidenceGateApplied && <span className="ml-2 text-destructive">evidence gate applied</span>}
+            </div>
+            <p>{p.rationale}</p>
+            <p className="text-muted-foreground">
+              Confidence {p.confidence != null ? Math.round(p.confidence * 100) + "%" : "n/a"}. Policy: {p.policySource ?? "none"}. Approval:{" "}
+              {p.approvals.map((a) => a.decision).join(", ") || "none"}
+            </p>
+            {p.customerReplyDraft && (
+              <details className="mt-1">
+                <summary className="cursor-pointer">Customer reply draft ({c.customerLanguage})</summary>
+                <p className="whitespace-pre-wrap">{p.customerReplyDraft}</p>
+              </details>
+            )}
+          </div>
+        ))}
+        {c.resolutionProposals.length === 0 && <p className="text-sm text-muted-foreground">No proposals yet.</p>}
+      </section>
+
       <section className="flex flex-col gap-2">
         <h2 className="font-medium">Attachments</h2>
         <form action="/api/attachments/upload" method="post" encType="multipart/form-data" className="flex flex-wrap items-end gap-2 rounded-md border border-border p-4">
@@ -68,7 +111,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         <ul className="text-sm">
           {c.attachments.map((a) => (
             <li key={a.id} className="border-t border-border py-1">
-              {a.fileName} - {a.attachmentCategory} - {a.sniffedContentType} - evidence: {a.evidenceStatus}
+              {a.fileName} - {a.attachmentCategory}{a.photoSubject ? ` (${a.photoSubject})` : ""} - {a.sniffedContentType} - evidence: {a.evidenceStatus}{a.aiNotes ? ` - ${a.aiNotes}` : ""}
               {a.contentTypeMismatch && (
                 <span className="text-destructive"> (declared {a.declaredContentType}, content differs)</span>
               )}

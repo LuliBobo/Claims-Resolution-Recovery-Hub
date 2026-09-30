@@ -4,6 +4,8 @@ import { logAuditEvent } from "@/server/audit";
 import { putBlob } from "@/server/storage";
 import { ALLOWED_UPLOAD_TYPES, MAX_UPLOAD_BYTES, sniffContentType } from "@/lib/file-sniff";
 import { ATTACHMENT_CATEGORIES } from "@/lib/validation/case";
+import { assessObservation, type AttachmentObservation } from "@/server/evidence/assess";
+import { observeAttachment, type JudgeInput } from "@/server/llm/judge-evidence";
 
 export class UploadError extends Error {
   constructor(message: string) {
@@ -20,12 +22,17 @@ export interface UploadInput {
   bytes: Uint8Array;
 }
 
+export interface UploadDeps {
+  observe: (input: JudgeInput) => Promise<AttachmentObservation>;
+}
+const defaultDeps: UploadDeps = { observe: observeAttachment };
+
 /**
  * Stores an attachment. The declared MIME type is untrusted: the real type is sniffed from
  * the bytes, and only sniffed-allowed types are accepted. Both are stored, with a mismatch
- * flag. evidenceStatus starts at pending_review; sufficiency judging arrives in M4.
+ * flag. The evidence judge then sets evidenceStatus (stays pending_review if it fails).
  */
-export async function uploadAttachment(actor: Actor | null, input: UploadInput) {
+export async function uploadAttachment(actor: Actor | null, input: UploadInput, deps: UploadDeps = defaultDeps) {
   const user = requireRole(actor, ...ANY_ROLE);
   if (!(ATTACHMENT_CATEGORIES as readonly string[]).includes(input.category)) {
     throw new UploadError("Unknown attachment category");
@@ -43,7 +50,7 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput) 
   await db.customerCase.findUniqueOrThrow({ where: { id: input.caseId }, select: { id: true } });
   const storageRef = await putBlob(input.bytes);
 
-  return db.$transaction(async (tx) => {
+  const created = await db.$transaction(async (tx) => {
     const attachment = await tx.attachment.create({
       data: {
         linkedCaseId: input.caseId,
@@ -70,4 +77,40 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput) 
     );
     return attachment;
   });
+
+  // Judge sufficiency (LLM observes, pure modules decide). On failure the attachment stays
+  // pending_review, which the gate treats as not sufficient (fail-safe).
+  const c = await db.customerCase.findUniqueOrThrow({
+    where: { id: input.caseId },
+    select: { internalEnglishSummary: true, complaintText: true },
+  });
+  try {
+    const observation = await deps.observe({
+      category: created.attachmentCategory,
+      fileName: created.fileName,
+      contentType: sniffed,
+      bytes: input.bytes,
+      complaintSummary: c.internalEnglishSummary ?? c.complaintText.slice(0, 500),
+    });
+    const a = assessObservation(observation);
+    return db.$transaction(async (tx) => {
+      const updated = await tx.attachment.update({
+        where: { id: created.id },
+        data: { evidenceStatus: a.status, aiNotes: a.notes, photoSubject: a.photoSubject },
+      });
+      await logAuditEvent(
+        { caseId: input.caseId, actor: "system", action: "evidence_judged", previousState: "pending_review", newState: a.status, notes: `${created.fileName}: ${a.reason}` },
+        tx,
+      );
+      return updated;
+    });
+  } catch (e) {
+    await logAuditEvent({
+      caseId: input.caseId,
+      actor: "system",
+      action: "llm_step_failed",
+      notes: `evidence judging failed for ${created.fileName}: ${e instanceof Error ? e.message : String(e)}`,
+    });
+    return created;
+  }
 }

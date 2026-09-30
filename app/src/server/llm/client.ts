@@ -32,6 +32,8 @@ export interface CallJsonOptions<T extends z.ZodType> {
   description: string;
   system: string;
   user: string;
+  /** Extra content blocks (images, documents) sent alongside `user`. */
+  extraContent?: Anthropic.ContentBlockParam[];
   schema: T;
   maxTokens?: number;
 }
@@ -46,7 +48,12 @@ export async function callClaudeJson<T extends z.ZodType>(
       model: process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
       max_tokens: opts.maxTokens ?? 1024,
       system: opts.system,
-      messages: [{ role: "user", content: opts.user }],
+      messages: [
+        {
+          role: "user",
+          content: opts.extraContent ? [...opts.extraContent, { type: "text", text: opts.user }] : opts.user,
+        },
+      ],
       tools: [
         {
           name: opts.name,

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getActor } from "@/lib/session";
 import { createCase } from "@/server/workflows/case-intake";
 import { updateCase } from "@/server/workflows/case-management";
+import { regenerateResolutionProposal } from "@/server/workflows/regenerate-proposal";
 
 export async function createCaseAction(_p: string | undefined, fd: FormData) {
   let id: string;
@@ -31,4 +32,13 @@ export async function updateCaseAction(id: string, _p: string | undefined, fd: F
   }
   revalidatePath(`/cases/${id}`);
   revalidatePath("/cases");
+}
+
+export async function regenerateProposalAction(caseId: string) {
+  try {
+    await regenerateResolutionProposal(await getActor(), caseId);
+  } catch (e) {
+    return e instanceof Error ? e.message : "Unexpected error";
+  }
+  revalidatePath(`/cases/${caseId}`);
 }

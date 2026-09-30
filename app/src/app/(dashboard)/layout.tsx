@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActor } from "@/lib/session";
 import { logoutAction } from "@/actions/auth";
+import { PrototypeBanner } from "@/components/features/prototype-banner";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
@@ -33,7 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </form>
         </div>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+      <div className="flex-1">
+        <PrototypeBanner />
+        <main className="p-6">{children}</main>
+      </div>
     </div>
   );
 }

@@ -2,8 +2,9 @@
 // live counts: 3 PolicyDocuments, 3 Rules. Plain types so prisma/seed.ts can import this
 // file without the "@/..." alias.
 
-// The evidence gate matches this exact name string (carrier-claims-gate, M4).
-// Renaming this document silently disables the gate.
+// The evidence gate matches this exact name string (see evidence/carrier-claims-gate.ts).
+// Renaming this document silently disables the gate. Kept literal here (not imported) so
+// prisma/seed.ts stays free of "@/..." aliases; a unit test asserts the two stay equal.
 export const CARRIER_CLAIMS_SOP_NAME = "DPD Carrier Claims SOP";
 
 export const SEED_POLICIES = [

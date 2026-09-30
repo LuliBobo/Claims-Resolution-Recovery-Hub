@@ -14,12 +14,21 @@ const complaint = { source: "email", customerName: "Test Customer", complaintTex
 
 const okLlm: IntakeLlm = {
   summarize: async () => ({ customerLanguage: "SK", internalEnglishSummary: "Goods arrived broken." }),
-  classify: async () => ({ caseType: "damaged_delivery", priority: "high" }),
+  classify: async () => ({ caseType: "damaged_delivery", priority: "high", confidence: 0.9 }),
 };
 const failingLlm: IntakeLlm = {
   summarize: async () => { throw new Error("boom"); },
   classify: async () => { throw new Error("boom"); },
 };
+
+// Stub proposal generator so these tests never touch the network.
+const proposalOk = {
+  generate: async () => ({
+    recommendation: "Replace item", rationale: "r", confidence: 0.7, customerImpact: "low",
+    businessExposure: "low", policySource: "none", needsHumanApproval: true, customerReplyDraft: "hi",
+  }),
+};
+const proposalDown = { generate: async () => { throw new Error("down"); } };
 
 const createdCaseIds: string[] = [];
 beforeAll(async () => {
@@ -32,19 +41,19 @@ afterAll(async () => {
 
 describe("createCase", () => {
   it("fills language, summary, type and priority from the LLM and audits creation", async () => {
-    const c = await createCase(agent, complaint, okLlm);
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
     createdCaseIds.push(c.id);
-    expect(c).toMatchObject({ customerLanguage: "sk", caseType: "damaged_delivery", priority: "high", needsManualTriage: false });
+    expect(c).toMatchObject({ customerLanguage: "sk", caseType: "damaged_delivery", priority: "high", needsManualTriage: false, classificationConfidence: 0.9 });
     const events = await db.auditEvent.findMany({ where: { linkedCaseId: c.id } });
-    expect(events.map((e) => e.action)).toEqual(["case_created"]);
+    expect(events.map((e) => e.action)).toEqual(expect.arrayContaining(["case_created", "resolution_proposal_generated"]));
   });
 
   it("still creates the case when the LLM fails, flagged for manual triage", async () => {
-    const c = await createCase(agent, complaint, failingLlm);
+    const c = await createCase(agent, complaint, failingLlm, proposalDown);
     createdCaseIds.push(c.id);
     expect(c).toMatchObject({ needsManualTriage: true, caseType: "other", priority: "medium", internalEnglishSummary: null });
     const actions = (await db.auditEvent.findMany({ where: { linkedCaseId: c.id } })).map((e) => e.action);
-    expect(actions.filter((a) => a === "llm_step_failed")).toHaveLength(2);
+    expect(actions.filter((a) => a === "llm_step_failed")).toHaveLength(3); // summary, classification, proposal
   });
 
   it("does not classify when type and priority are supplied", async () => {
@@ -52,7 +61,8 @@ describe("createCase", () => {
     const c = await createCase(
       agent,
       { ...complaint, caseType: "wrong_item", priority: "low" },
-      { ...okLlm, classify: async () => { classified = true; return { caseType: "other", priority: "urgent" }; } },
+      { ...okLlm, classify: async () => { classified = true; return { caseType: "other", priority: "urgent", confidence: 0.5 }; } },
+      proposalOk,
     );
     createdCaseIds.push(c.id);
     expect(classified).toBe(false);
@@ -66,12 +76,12 @@ describe("createCase", () => {
 
 describe("updateCase", () => {
   it("logs status changes as previous -> new and stamps resolvedAt", async () => {
-    const c = await createCase(agent, complaint, okLlm);
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
     createdCaseIds.push(c.id);
     const u = await updateCase(agent, c.id, { status: "resolved" });
     expect(u.resolvedAt).not.toBeNull();
-    const ev = await db.auditEvent.findFirstOrThrow({ where: { linkedCaseId: c.id, action: "status_changed" } });
-    expect([ev.previousState, ev.newState]).toEqual(["new", "resolved"]);
+    const ev = await db.auditEvent.findFirstOrThrow({ where: { linkedCaseId: c.id, action: "status_changed", newState: "resolved" } });
+    expect([ev.previousState, ev.newState]).toEqual(["awaiting_approval", "resolved"]);
   });
 });
 
@@ -79,7 +89,7 @@ describe("uploadAttachment", () => {
   const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
   it("stores sniffed and declared types and flags a mismatch", async () => {
-    const c = await createCase(agent, complaint, okLlm);
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
     createdCaseIds.push(c.id);
     const ok = await uploadAttachment(agent, { caseId: c.id, fileName: "a.png", declaredContentType: "image/png", category: "photo_evidence", bytes: png });
     expect(ok).toMatchObject({ sniffedContentType: "image/png", contentTypeMismatch: false, evidenceStatus: "pending_review" });
@@ -88,7 +98,7 @@ describe("uploadAttachment", () => {
   });
 
   it("rejects content that is not an allowed type regardless of the declared type", async () => {
-    const c = await createCase(agent, complaint, okLlm);
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
     createdCaseIds.push(c.id);
     const exe = new Uint8Array([0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00]);
     await expect(

@@ -4,6 +4,7 @@ import { callClaudeJson } from "./client";
 const schema = z.object({
   caseType: z.enum(["damaged_delivery", "wrong_item", "missing_item", "return_request", "other"]),
   priority: z.enum(["low", "medium", "high", "urgent"]),
+  confidence: z.number().min(0).max(1).describe("Your confidence in caseType, 0 to 1"),
 });
 
 export type ClassifyResult = z.infer<typeof schema>;

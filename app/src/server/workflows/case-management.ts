@@ -33,6 +33,7 @@ export function getCase(id: string) {
       shipment: true,
       attachments: { orderBy: { createdAt: "asc" } },
       auditEvents: { orderBy: { eventTime: "asc" } },
+      resolutionProposals: { orderBy: { createdAt: "asc" }, include: { approvals: true } },
     },
   });
 }

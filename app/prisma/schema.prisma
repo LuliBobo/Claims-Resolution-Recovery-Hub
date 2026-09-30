@@ -117,6 +117,14 @@ enum ProposalStatus {
   superseded
 }
 
+// What a photo_evidence attachment depicts, as observed by the evidence judge (never
+// inferred from the file name, which is what the Luo prototype did).
+enum PhotoSubject {
+  item
+  outer_carton
+  other
+}
+
 enum RuleTriggerType {
   damaged_delivery
   wrong_item
@@ -241,6 +249,8 @@ model CustomerCase {
   resolvedAt                  DateTime?
   // Set when LLM translate/classify failed at intake; case still created, needs manual triage.
   needsManualTriage           Boolean      @default(false)
+  // 0..1, as reported by the classifier; null when classification was manual or failed.
+  classificationConfidence    Float?
   // Single stored source of truth for "which proposal is current" (supersession Part B.2).
   currentResolutionProposalId String?      @unique
 
@@ -269,6 +279,8 @@ model Attachment {
   // Detected from the actual bytes; the value everything else should trust.
   sniffedContentType  String?
   contentTypeMismatch Boolean            @default(false)
+  // Set by the evidence judge for photo_evidence attachments.
+  photoSubject        PhotoSubject?
   attachmentCategory  AttachmentCategory @default(other)
   aiNotes             String?
   // The single field every consumer reads to decide whether evidence is sufficient.
