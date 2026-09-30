@@ -169,7 +169,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         <ul className="text-sm">
           {c.attachments.map((a) => (
             <li key={a.id} className="border-t border-border py-1">
-              {a.fileName} - {a.attachmentCategory}{a.photoSubject ? ` (${a.photoSubject})` : ""} - {a.sniffedContentType} - evidence: {a.evidenceStatus}{a.aiNotes ? ` - ${a.aiNotes}` : ""}
+              {a.fileName} - {a.attachmentCategory}{a.photoSubject ? ` (${a.photoSubject})` : ""}{a.sniffedContentType ? ` - ${a.sniffedContentType}` : ""} - evidence: {a.evidenceStatus}{a.aiNotes ? ` - ${a.aiNotes}` : ""}
               {a.contentTypeMismatch && (
                 <span className="text-destructive"> (declared {a.declaredContentType}, content differs)</span>
               )}
@@ -185,7 +185,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           {c.auditEvents.map((e) => (
             <li key={e.id} className="border-t border-border py-1">
               {e.eventTime.toISOString().slice(0, 19).replace("T", " ")} - {e.actor} - {e.action}
-              {(e.previousState || e.newState) && ` (${e.previousState ?? "-"} -> ${e.newState ?? "-"})`}
+              {e.previousState && e.newState ? ` (${e.previousState} -> ${e.newState})` : e.newState ? ` (${e.newState})` : ""}
               {e.notes && ` - ${e.notes}`}
             </li>
           ))}
