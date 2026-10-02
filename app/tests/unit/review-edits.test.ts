@@ -40,3 +40,10 @@ describe("approvalSummary", () => {
     );
   });
 });
+
+describe("newline normalisation", () => {
+  it("treats CRLF from a browser textarea as unchanged text", () => {
+    expect(diffEdits({ t: "a\nb" }, { t: "a\r\nb" })).toEqual({});
+    expect(proposalEditsSchema.parse({ rationale: "a\r\nb\r\n" }).rationale).toBe("a\nb");
+  });
+});

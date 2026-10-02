@@ -1,3 +1,4 @@
+import { normalizeNewlines } from "@/lib/validation/review";
 import { ANY_ROLE, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
@@ -129,7 +130,7 @@ async function loadOpenDraft(tx: Tx, draftId: string) {
 /** Edit the text of an open draft (the person's own wording wins over the AI's). */
 export async function editMessageDraft(actor: Actor | null, draftId: string, body: string) {
   const user = requireRole(actor, ...ANY_ROLE);
-  const text = body.trim();
+  const text = normalizeNewlines(body).trim();
   if (!text) throw new MessageError("The message cannot be empty");
   return db.$transaction(async (tx) => {
     const d = await loadOpenDraft(tx, draftId);

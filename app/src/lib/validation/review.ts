@@ -2,7 +2,10 @@ import { z } from "zod";
 
 // Fields a reviewer may change while approving. Strict: anything else is rejected, so an
 // edit can never touch status, confidence, policy source or the evidence-gate flag.
-const text = z.string().trim().min(1, "Must not be empty");
+// Browsers submit textarea line breaks as CRLF while stored text uses LF; normalise so an unchanged
+// multi-line field is not mistaken for an edit.
+export const normalizeNewlines = (v: string) => v.replace(/\r\n?/g, "\n");
+const text = z.string().transform(normalizeNewlines).pipe(z.string().trim().min(1, "Must not be empty"));
 
 export const proposalEditsSchema = z
   .object({ recommendation: text, rationale: text, customerReplyDraft: text })
@@ -24,7 +27,7 @@ export function diffEdits(current: Record<string, string | number | null>, edits
   for (const [field, to] of Object.entries(edits)) {
     if (to === undefined) continue;
     const from = current[field] ?? null;
-    if (String(from) !== String(to)) diff[field] = { from, to };
+    if (typeof from === "string" && typeof to === "string" ? normalizeNewlines(from) !== normalizeNewlines(to) : String(from) !== String(to)) diff[field] = { from, to };
   }
   return diff;
 }
