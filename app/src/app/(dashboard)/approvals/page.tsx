@@ -7,6 +7,8 @@ import { getWorkflowScore } from "@/server/scoring";
 import { listPendingApprovals } from "@/server/workflows/review-approval";
 
 export const dynamic = "force-dynamic";
+// LLM calls happen in this route (or the actions it hosts); allow more than the platform default.
+export const maxDuration = 60;
 
 export default async function ApprovalsPage() {
   const [actor, approvals, needReconcile] = await Promise.all([getActor(), listPendingApprovals(), listCasesNeedingReconciliation()]);

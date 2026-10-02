@@ -10,6 +10,10 @@ const prisma = new PrismaClient({
 
 // Dev-only credentials. Override the shared password via SEED_PASSWORD.
 const password = process.env.SEED_PASSWORD ?? "changeme-dev";
+const production = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL) || process.env.VERCEL_ENV === "production";
+if (production && !process.env.SEED_PASSWORD && !process.env.SEED_SKIP_USERS) {
+  throw new Error("Refusing to create demo users with the default password in a production environment. Set SEED_PASSWORD, or SEED_SKIP_USERS=1 and use `npm run user:create` instead.");
+}
 
 const USERS: { email: string; name: string; role: UserRole }[] = [
   { email: "agent@example.com", name: "Alex Agent", role: "agent" },
@@ -46,9 +50,11 @@ async function seedPoliciesAndRules() {
 }
 
 async function main() {
-  await seedUsers();
+  if (!process.env.SEED_SKIP_USERS) await seedUsers();
   await seedPoliciesAndRules();
-  if (!process.env.SEED_SKIP_SAMPLES) {
+  if (production && !process.env.SEED_ALLOW_SAMPLES) {
+    console.log("Production environment: skipping the synthetic sample cases (set SEED_ALLOW_SAMPLES=1 to load them anyway).");
+  } else if (!process.env.SEED_SKIP_SAMPLES) {
     // Loaded lazily: this pulls in the app's workflow code and its own Prisma client.
     const { seedSampleData } = await import("../src/server/seed/sample-data");
     const r = await seedSampleData();

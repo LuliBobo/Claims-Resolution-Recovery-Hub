@@ -16,7 +16,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "vercel-build": "prisma migrate deploy && next build"
+    "user:create": "tsx scripts/create-user.ts",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ] || [ \"$RUN_MIGRATIONS\" = \"1\" ]; then prisma migrate deploy; fi && next build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

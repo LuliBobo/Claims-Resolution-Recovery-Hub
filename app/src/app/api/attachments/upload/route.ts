@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { AuthError } from "@/server/auth";
 import { getActor } from "@/lib/session";
 import { UploadError, uploadAttachment } from "@/server/workflows/upload-attachment";
+// LLM calls happen in this route (or the actions it hosts); allow more than the platform default.
+export const maxDuration = 60;
 
 // Multipart upload. Thin wrapper over the workflow; redirects back to the case page.
 export async function POST(request: Request) {

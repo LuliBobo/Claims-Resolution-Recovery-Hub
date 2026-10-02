@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { Client } from "pg";
 
 // The full happy path, mirroring Testing/e2e_damaged_shipment_test_results.md:
@@ -163,4 +164,43 @@ test("reviewer requests more evidence: the item leaves the queue, needs a commen
   await expect(agent.getByText('evidence requested by reviewer@example.com - "Please add a photo of the outer carton"')).toBeVisible();
   await expect(agent.getByRole("button", { name: /Mark as sent/ })).toHaveCount(0);
   await expect(agent.getByText("resolution_proposal_evidence_requested").first()).toBeVisible();
+});
+
+test("deployment safeguards: security headers, health check, and sign-in lockout", async ({ browser, request }) => {
+  // Security headers on a normal page.
+  const h = (await request.get("/login")).headers();
+  expect(h["x-content-type-options"]).toBe("nosniff");
+  expect(h["x-frame-options"]).toBe("DENY");
+  expect(h["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(h["strict-transport-security"]).toContain("max-age=");
+  expect(h["x-powered-by"]).toBeUndefined();
+
+  // Health: public output is minimal. This server runs with the fake LLM on, which must be flagged
+  // as degraded (a real deployment never sets it), while the database itself is reachable.
+  const health = await request.get("/api/health");
+  expect(health.status()).toBe(503);
+  expect(await health.json()).toEqual({ status: "degraded", database: true });
+
+  // A dedicated user (created with the production user script) so other tests' accounts stay usable.
+  execFileSync("npx", ["tsx", "scripts/create-user.ts", "lockout@example.com", "Lockout Test", "agent"], {
+    env: { ...process.env, NEW_USER_PASSWORD: "lockout-test-password" },
+    stdio: "pipe",
+  });
+  const page = await (await browser.newContext()).newPage();
+  const attempt = async (password: string) => {
+    await page.goto("/login");
+    await page.getByPlaceholder("Email").fill("lockout@example.com");
+    await page.getByPlaceholder("Password").fill(password);
+    await page.getByRole("button", { name: "Sign in" }).click();
+  };
+  for (let i = 0; i < 5; i++) {
+    await attempt("wrong-password");
+    await expect(page.getByText("Invalid email or password.")).toBeVisible();
+  }
+  await attempt("lockout-test-password"); // the right password is now refused too
+  await expect(page.getByText("Invalid email or password.")).toBeVisible();
+  await expect(page).toHaveURL(/\/login/);
+
+  // Other accounts are unaffected.
+  await login(browser, "agent");
 });

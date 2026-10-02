@@ -17,6 +17,8 @@ import { getCase } from "@/server/workflows/case-management";
 import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
 
 export const dynamic = "force-dynamic";
+// LLM calls happen in this route (or the actions it hosts); allow more than the platform default.
+export const maxDuration = 60;
 
 export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">) {
   const { caseId } = await props.params;

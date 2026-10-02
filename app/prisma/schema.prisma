@@ -420,3 +420,13 @@ model AttachmentBlob {
 
   attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
 }
+
+// Failed and successful sign-in attempts, used to throttle password guessing per email.
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  email     String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}

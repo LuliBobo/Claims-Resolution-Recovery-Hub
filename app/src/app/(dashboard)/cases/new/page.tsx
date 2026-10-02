@@ -4,6 +4,8 @@ import { CASE_TYPES, PRIORITIES, SOURCES } from "@/lib/validation/case";
 import { listOrders, listShipments } from "@/server/reference-data";
 
 export const dynamic = "force-dynamic";
+// LLM calls happen in this route (or the actions it hosts); allow more than the platform default.
+export const maxDuration = 60;
 
 const opt = (xs: readonly string[]) => xs.map((x) => ({ value: x, label: x }));
 
