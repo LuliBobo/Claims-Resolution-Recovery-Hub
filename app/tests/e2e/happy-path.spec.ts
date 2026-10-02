@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { Client } from "pg";
+import { buildTextPdf } from "@/lib/pdf-build";
 
 // The full happy path, mirroring Testing/e2e_damaged_shipment_test_results.md:
 // case -> proposal -> evidence gate -> evidence uploaded -> new proposal -> both approvals
@@ -220,4 +221,56 @@ test("deployment safeguards: security headers, health check, and sign-in lockout
 
   // Other accounts are unaffected.
   await login(browser, "agent");
+});
+
+test("policy PDFs: upload, search, and a proposal that cites the verbatim excerpt", async ({ browser }) => {
+  const reviewer = await login(browser, "reviewer");
+  await reviewer.goto("/policy-rules");
+  const sop = reviewer.locator("li").filter({ hasText: "DPD Carrier Claims SOP" }).first();
+
+  // A file that is not a PDF is refused, whatever it is called and whatever type the browser claims.
+  await sop.locator('input[type="file"]').setInputFiles({ name: "fake.pdf", mimeType: "application/pdf", buffer: PNG });
+  await sop.getByRole("button", { name: "Upload PDF" }).click();
+  await expect(reviewer.getByText("Only PDF files can be uploaded as policy documents")).toBeVisible();
+
+  // A real PDF is accepted and split into passages by page.
+  const pdf = buildTextPdf([
+    "Section 1. A transit damage claim must be filed within 7 days of delivery.",
+    "Section 2. Every damaged delivery claim needs a shipping label photo, a damaged item photo and an outer carton photo.",
+  ]);
+  await sop.locator('input[type="file"]').setInputFiles({ name: "sop.pdf", mimeType: "application/pdf", buffer: Buffer.from(pdf) });
+  await sop.getByRole("button", { name: "Upload PDF" }).click();
+  await expect(reviewer.getByText(/Done: 2 passages from 2 pages/)).toBeVisible();
+  await expect(sop.getByText(/sop\.pdf: 2 pages, 2 passages/)).toBeVisible();
+
+  // The stored PDF downloads behind login; the test search finds the right page.
+  const href = await sop.getByRole("link", { name: "sop.pdf" }).getAttribute("href");
+  const dl = await reviewer.request.get(href!);
+  expect(dl.status()).toBe(200);
+  expect(Buffer.compare(await dl.body(), Buffer.from(pdf))).toBe(0);
+  expect((await (await browser.newContext()).request.get(href!)).status()).toBe(401);
+  await reviewer.getByPlaceholder(/Test search/).fill("outer carton photo");
+  await reviewer.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(reviewer.locator("blockquote").filter({ hasText: "outer carton photo" })).toBeVisible();
+  await expect(reviewer.getByText("DPD Carrier Claims SOP v1.0, page 2")).toBeVisible();
+
+  // A new damaged-delivery case: the retrieved passage is cited verbatim on the proposal. (The fake AI
+  // also cites an id it was never shown; that one must be dropped, leaving exactly one excerpt.)
+  const agent = await login(browser, "agent");
+  await agent.goto("/cases/new");
+  await agent.locator('select[name="source"]').selectOption("email");
+  await agent.locator('input[name="customerName"]').fill("E2E Policy Cite");
+  await agent.locator('textarea[name="complaintText"]').fill("The vase arrived shattered.");
+  await agent.getByRole("button", { name: "Create case" }).click();
+  await expect(agent).toHaveURL(/\/cases\/[0-9a-f-]{36}$/);
+  await agent.getByText("Policy excerpts (1)").first().click();
+  await expect(agent.locator("blockquote").filter({ hasText: "Every damaged delivery claim needs a shipping label photo" })).toBeVisible();
+  await expect(agent.getByText("DPD Carrier Claims SOP v1.0, page 2").first()).toBeVisible();
+  await expect(agent.getByText("1 policy excerpt(s) cited of 2 retrieved; 1 cited id(s) were not among the retrieved excerpts and were dropped")).toBeVisible();
+
+  // Reviewers see the same excerpt where they decide.
+  await reviewer.goto("/approvals");
+  const card = reviewer.locator("div.rounded-md.border").filter({ hasText: "E2E Policy Cite" }).first();
+  await card.getByText("Policy excerpts (1)").click();
+  await expect(card.locator("blockquote")).toContainText("outer carton photo");
 });

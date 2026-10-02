@@ -13,12 +13,21 @@ export function assertFakeLlmAllowed() {
 export function fakeCall<T extends z.ZodType>(opts: CallJsonOptions<T>): z.infer<T> {
   assertFakeLlmAllowed();
   const fileName = /File name: (.*)/.exec(opts.user)?.[1] ?? "";
+  // For the proposal call: cite the first retrieved excerpt (and one id it was never shown, which must be dropped).
+  let firstExcerptId: string | undefined;
+  try {
+    const ctx = JSON.parse(/<case>\n([\s\S]*)\n<\/case>/.exec(opts.user)?.[1] ?? "{}");
+    firstExcerptId = ctx.policyExcerpts?.[0]?.id;
+  } catch {
+    firstExcerptId = undefined;
+  }
   const out: Record<string, unknown> = {
     record_complaint_summary: { customerLanguage: "en", internalEnglishSummary: "E2E: item arrived broken." },
     record_classification: { caseType: "damaged_delivery", priority: "medium", confidence: 0.9 },
     record_resolution_proposal: {
       recommendation: "Arrange Replacement Shipment", rationale: "E2E rationale.", confidence: 0.8, customerImpact: "moderate",
       businessExposure: "manageable", policySource: "DPD Carrier Claims SOP v1.0", needsHumanApproval: true, customerReplyDraft: "E2E reply to the customer.",
+      citedExcerptIds: firstExcerptId ? [firstExcerptId, "not-a-real-passage-id"] : [],
     },
     record_recovery_draft: { claimType: "Transit damage", draftText: "E2E claim text for the carrier.", estimatedRecoverableValue: 40 },
     record_photo_observation: {

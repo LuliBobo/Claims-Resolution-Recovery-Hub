@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { callClaudeJson } from "./client";
+import type { PolicyExcerpt } from "@/server/policy/citations";
 import { PROPOSAL_SYSTEM } from "./prompts/proposal";
 
 const schema = z.object({
@@ -11,11 +12,17 @@ const schema = z.object({
   policySource: z.string().describe("Name and version of the rule or policy relied on, or 'none'"),
   needsHumanApproval: z.boolean(),
   customerReplyDraft: z.string().describe("Customer-facing reply written in the customer's language"),
+  citedExcerptIds: z
+    .array(z.string())
+    .optional()
+    .describe("Ids of the provided policy excerpts that directly support the recommendation. Only ids from policyExcerpts; empty if none apply. Never quote or paraphrase excerpts here."),
 });
 
 export type GeneratedProposal = z.infer<typeof schema>;
 
 export interface ProposalContext {
+  /** Verbatim policy passages retrieved for this case; the only things the AI may cite. */
+  policyExcerpts: PolicyExcerpt[];
   caseType: string;
   priority: string;
   customerLanguage: string;

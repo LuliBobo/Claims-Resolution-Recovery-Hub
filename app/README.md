@@ -74,4 +74,13 @@ deployment itself has not been run from here.
   request to customer" has the AI word an email around exactly that list, in the customer's language. It is
   a draft only: a person edits it, sends it themselves, and marks it sent (manual attestation); a newer draft
   replaces the open one, and marking sent is refused once nothing is missing any more.
-- Not built from the original concept doc: PDF policy retrieval with excerpts and a guided demo mode.
+- Policy PDFs with cited excerpts (`src/server/policy/`): reviewers/admins upload a PDF to each policy
+  document; the text is extracted per page (no OCR, so scanned PDFs are flagged as unsearchable) and stored as
+  passages with page numbers. Retrieval is deterministic Postgres full-text search over active documents
+  (documents linked to the matched rules rank higher), with no AI in the ranking. The AI is shown the retrieved
+  passages with ids and may only cite those ids; each citation is resolved to the stored text and snapshotted
+  verbatim on the proposal (document, version, page, excerpt), so editing or replacing a policy later never
+  rewrites history, and ids the AI invents are dropped. A proposal that cites nothing says so. Excerpts show on
+  the case page and the approvals queue; the Policy & Rules page has a test search. Passages are whitespace-
+  normalised contiguous text from the PDF; tables and multi-column layouts may extract in reading order only.
+- Not built from the original concept doc: a guided demo mode.

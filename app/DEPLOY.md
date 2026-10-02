@@ -84,7 +84,11 @@ in the browser:
    include the error).
 3. Upload a real photo of damage. Its row should show an evidence status and AI notes (not stuck on
    `pending_review`), and the download link should return the same file.
-4. Trigger both jobs once by hand:
+4. On *Policy & Rules*, upload one real policy PDF (text-based, not a scan) to a policy document, then
+   use the test search for a phrase from it: the matching passage and its page number should appear. Create a
+   case of the matching type; its proposal should list the cited excerpt (a proposal that cites nothing says
+   so, which is also correct when no passage applies).
+5. Trigger both jobs once by hand:
 
    ```bash
    curl -s -H "Authorization: Bearer $CRON_SECRET" $BASE/api/cron/recompute-insights
@@ -107,6 +111,9 @@ in the browser:
   window, even for the right password (per email, not per IP: an attacker can temporarily lock a known
   address). Failures for unknown emails count the same way, so the response never reveals which
   accounts exist.
+- **Policy PDFs** are stored in Postgres like attachments (4 MB each, 200 pages, 3000 passages at most) and
+  text is extracted in the function with `unpdf` (a serverless build of PDF.js). It was exercised locally and
+  in the browser tests but not on Vercel itself: check the upload in step 5.4 after deploying. There is no OCR.
 - **Not included:** a Content-Security-Policy header (the other security headers are set in
   `next.config.ts`), email or any outbound messaging ("sent" is a manual attestation), password
   reset, and multi-factor sign-in.

@@ -15,7 +15,11 @@ export const listOrders = () => db.order.findMany({ orderBy: { orderDate: "desc"
 export const listShipments = () =>
   db.shipment.findMany({ orderBy: { createdAt: "desc" }, include: { order: true } });
 export const listPolicyDocuments = () =>
-  db.policyDocument.findMany({ orderBy: { name: "asc" } });
+  db.policyDocument.findMany({
+    orderBy: { name: "asc" },
+    // Never select the PDF bytes for a listing.
+    include: { file: { select: { fileName: true, pageCount: true, emptyPages: true, passageCount: true, uploadedBy: true, uploadedAt: true } } },
+  });
 export const listRules = () =>
   db.rule.findMany({ orderBy: { ruleName: "asc" }, include: { linkedPolicyDocument: true } });
 

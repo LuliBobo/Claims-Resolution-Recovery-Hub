@@ -7,6 +7,10 @@ import {
 } from "@/server/evidence/carrier-claims-gate";
 import { generateProposal, type GeneratedProposal, type ProposalContext } from "@/server/llm/generate-proposal";
 import { findActiveRulesForCaseType } from "@/server/reference-data";
+import type { Prisma } from "@/generated/prisma/client";
+import { resolveCitations } from "@/server/policy/citations";
+import { buildSearchTerms } from "@/server/policy/chunk";
+import { searchPolicyPassages } from "@/server/policy/search";
 import { lockCase, resolveCurrent, supersedeProposal, type Tx } from "./proposal-supersession";
 
 export interface ProposalDeps {
@@ -53,7 +57,20 @@ export async function generateResolutionProposal(actorLabel: string, caseId: str
   });
   const rulesForPrompt = await findActiveRulesForCaseType(c.caseType);
 
+  // Deterministic retrieval of verbatim policy passages (documents linked to the matched rules rank higher).
+  const hits = await searchPolicyPassages(
+    buildSearchTerms([
+      c.caseType.replace(/_/g, " "),
+      c.internalEnglishSummary ?? c.complaintText,
+      c.order?.productName,
+      ...rulesForPrompt.flatMap((r) => [r.ruleName, r.requiredEvidence, r.recommendedResolution]),
+    ]),
+    rulesForPrompt.flatMap((r) => (r.linkedPolicyDocumentId ? [r.linkedPolicyDocumentId] : [])),
+  );
+  const policyExcerpts = hits.map(({ id, document, version, page, text }) => ({ id, document, version, page, text }));
+
   const generated = await deps.generate({
+    policyExcerpts,
     caseType: c.caseType,
     priority: c.priority,
     customerLanguage: c.customerLanguage,
@@ -77,6 +94,9 @@ export async function generateResolutionProposal(actorLabel: string, caseId: str
     })),
   });
 
+  // Only excerpts the AI was actually shown can be cited; each is snapshotted verbatim.
+  const { citations, ignored } = resolveCitations(generated.citedExcerptIds, policyExcerpts);
+
   return db.$transaction(
     async (tx) => {
       await lockCase(tx, caseId);
@@ -99,6 +119,7 @@ export async function generateResolutionProposal(actorLabel: string, caseId: str
           needsHumanApproval: final.needsHumanApproval,
           customerReplyDraft: final.customerReplyDraft,
           evidenceGateApplied: final.evidenceGateApplied,
+          citations: citations as unknown as Prisma.InputJsonValue,
         },
       });
       const approval = await tx.humanApproval.create({
@@ -122,9 +143,16 @@ export async function generateResolutionProposal(actorLabel: string, caseId: str
           action: "resolution_proposal_generated",
           newState: proposal.status,
           ruleSource: final.policySource,
-          notes: final.evidenceGateApplied
-            ? `Evidence gate overrode the recommendation (LLM proposed "${generated.recommendation}"); missing: ${gate.missing.join(", ")}`
-            : null,
+          notes:
+            [
+              final.evidenceGateApplied
+                ? `Evidence gate overrode the recommendation (LLM proposed "${generated.recommendation}"); missing: ${gate.missing.join(", ")}`
+                : null,
+              `${citations.length} policy excerpt(s) cited of ${policyExcerpts.length} retrieved`,
+              ignored ? `${ignored} cited id(s) were not among the retrieved excerpts and were dropped` : null,
+            ]
+              .filter(Boolean)
+              .join("; ") || null,
         },
         tx,
       );

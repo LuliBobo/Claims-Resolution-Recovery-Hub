@@ -15,6 +15,7 @@ import { describeCurrent } from "@/server/workflows/proposal-supersession";
 import { draftEvidenceRequestAction } from "@/actions/messages";
 import { MessageDraftCard } from "@/components/features/message-draft-card";
 import { getMissingEvidence } from "@/server/workflows/customer-message";
+import { Citations } from "@/components/features/citations";
 import { RegenerateButton } from "@/components/features/regenerate-button";
 import { getCase } from "@/server/workflows/case-management";
 import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
@@ -186,6 +187,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
               Confidence {p.confidence != null ? Math.round(p.confidence * 100) + "%" : "n/a"}. Policy: {p.policySource ?? "none"}. Approval:{" "}
               {approvalSummary(p.approvals)}
             </p>
+            <Citations citations={p.citations} />
             {p.status === "approved" && p.id === current.currentId && (
               <div className="mt-2">
                 <ActionButton action={markProposalSentAction.bind(null, p.id, c.id)} label="Mark as sent (manual attestation)" />

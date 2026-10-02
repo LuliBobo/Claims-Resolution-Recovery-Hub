@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Citations } from "@/components/features/citations";
 import { ReviewForm } from "@/components/features/review-form";
 import { getActor } from "@/lib/session";
 import { REVIEW_ROLES } from "@/server/auth";
@@ -49,6 +50,7 @@ export default async function ApprovalsPage() {
                 {a.resolutionProposal.evidenceGateApplied && <span className="ml-2 text-destructive">evidence gate applied</span>}
               </div>
               <p>{a.resolutionProposal.rationale}</p>
+              <Citations citations={a.resolutionProposal.citations} />
             </div>
           )}
           {a.recoveryDraft && (

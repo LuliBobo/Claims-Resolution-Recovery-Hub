@@ -208,7 +208,9 @@ model PolicyDocument {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  rules Rule[]
+  rules    Rule[]
+  file     PolicyDocumentFile?
+  passages PolicyPassage[]
 }
 
 model Rule {
@@ -323,6 +325,9 @@ model ResolutionProposal {
   evidenceGateApplied Boolean        @default(false)
   createdAt           DateTime       @default(now())
   supersededAt        DateTime?
+  // Policy excerpts the recommendation rests on, snapshotted verbatim at generation time:
+  // [{ passageId, document, version, page, excerpt }]. Empty means nothing was cited.
+  citations           Json?
 
   case           CustomerCase    @relation("CaseProposals", fields: [linkedCaseId], references: [id], onDelete: Cascade)
   currentForCase CustomerCase?   @relation("CurrentProposal")
@@ -464,4 +469,34 @@ model CustomerMessageDraft {
   case CustomerCase @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
 
   @@index([linkedCaseId, createdAt])
+}
+
+// The uploaded PDF behind a policy document (bytes + extraction summary). One file per document;
+// re-uploading replaces it and its passages.
+model PolicyDocumentFile {
+  policyDocumentId String   @id
+  fileName         String
+  bytes            Bytes
+  pageCount        Int
+  // Pages that yielded no text (scanned images). There is no OCR.
+  emptyPages       Int
+  passageCount     Int
+  uploadedBy       String
+  uploadedAt       DateTime @default(now())
+
+  policyDocument PolicyDocument @relation(fields: [policyDocumentId], references: [id], onDelete: Cascade)
+}
+
+// A searchable chunk of a policy PDF, with its page. Retrieval is Postgres full-text search over `text`.
+model PolicyPassage {
+  id               String   @id @default(uuid())
+  policyDocumentId String
+  page             Int
+  ordinal          Int
+  text             String
+  createdAt        DateTime @default(now())
+
+  policyDocument PolicyDocument @relation(fields: [policyDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([policyDocumentId, page, ordinal])
 }
