@@ -10,6 +10,7 @@ import { getActor } from "@/lib/session";
 import { REVIEW_ROLES } from "@/server/auth";
 import { listPolicyDocuments, listRules } from "@/server/reference-data";
 import { buildSearchTerms } from "@/server/policy/chunk";
+import { getCarrierGateConfig } from "@/server/evidence/gate-config";
 import { searchPolicyPassages } from "@/server/policy/search";
 
 export const dynamic = "force-dynamic";
@@ -22,12 +23,15 @@ export default async function PolicyRulesPage(props: PageProps<"/policy-rules">)
   const sp = await props.searchParams;
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const q = one("q")?.trim();
-  const [actor, policies, rules] = await Promise.all([getActor(), listPolicyDocuments(), listRules()]);
+  const [actor, policies, rules, gateConfig] = await Promise.all([getActor(), listPolicyDocuments(), listRules(), getCarrierGateConfig()]);
   const hits = q ? await searchPolicyPassages(buildSearchTerms([q]), [], 8) : [];
   const canEdit = !!actor && REVIEW_ROLES.includes(actor.role);
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-xl font-semibold">Policy &amp; Rules</h1>
+      {gateConfig.problem && (
+        <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">{gateConfig.problem}</p>
+      )}
       {!canEdit && <p className="text-sm text-muted-foreground">Read-only: editing requires the reviewer or admin role.</p>}
 
       <section className="flex flex-col gap-3">

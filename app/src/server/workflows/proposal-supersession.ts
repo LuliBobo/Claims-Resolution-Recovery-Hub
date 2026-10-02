@@ -24,6 +24,8 @@ export interface CurrentState {
   /** True when the pointer is NULL and two or more live proposals exist: never guess. */
   needsReconciliation: boolean;
   liveIds: string[];
+  /** True when the pointer is set but a different live proposal exists (inconsistent; admin can reconcile). */
+  pointerMismatch: boolean;
 }
 
 /** Read-only view of which proposal is current. */
@@ -39,10 +41,11 @@ export async function describeCurrent(client: Reader, caseId: string): Promise<C
   });
   const liveIds = live.map((p) => p.id);
   if (c.currentResolutionProposalId) {
-    return { currentId: c.currentResolutionProposalId, needsReconciliation: false, liveIds };
+    const pointerMismatch = liveIds.some((i) => i !== c.currentResolutionProposalId);
+    return { currentId: c.currentResolutionProposalId, needsReconciliation: false, liveIds, pointerMismatch };
   }
-  if (liveIds.length === 1) return { currentId: liveIds[0], needsReconciliation: false, liveIds };
-  return { currentId: null, needsReconciliation: liveIds.length >= 2, liveIds };
+  if (liveIds.length === 1) return { currentId: liveIds[0], needsReconciliation: false, liveIds, pointerMismatch: false };
+  return { currentId: null, needsReconciliation: liveIds.length >= 2, liveIds, pointerMismatch: false };
 }
 
 /**

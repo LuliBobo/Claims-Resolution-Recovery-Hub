@@ -103,6 +103,16 @@ describe("updateCase", () => {
     expect([ev.previousState, ev.newState]).toEqual(["awaiting_approval", "resolved"]);
   });
 
+  it("assigns, keeps and clears the assigned reviewer", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    expect((await updateCase(agent, c.id, { assignedReviewer: "riley@test.io" })).assignedReviewer).toBe("riley@test.io");
+    expect((await updateCase(agent, c.id, { status: "in_review" })).assignedReviewer).toBe("riley@test.io");
+    expect((await updateCase(agent, c.id, { assignedReviewer: "  " })).assignedReviewer).toBeNull();
+    const ev = await db.auditEvent.findMany({ where: { linkedCaseId: c.id, action: "assignedReviewer_changed" }, orderBy: { eventTime: "asc" } });
+    expect(ev.map((e) => [e.previousState, e.newState])).toEqual([[null, "riley@test.io"], ["riley@test.io", null]]);
+  });
+
   it("lets only a reviewer or admin change case type or priority; agents may resubmit unchanged values", async () => {
     const c = await createCase(agent, complaint, okLlm, proposalOk);
     createdCaseIds.push(c.id);

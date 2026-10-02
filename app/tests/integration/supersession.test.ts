@@ -166,7 +166,24 @@ describe("legacy and ambiguous cases", () => {
     expect((await approvalFor(ids[2])).decision).toBe("superseded"); // was pending
     const ev = await db.auditEvent.findFirstOrThrow({ where: { linkedCaseId: caseId, action: "resolution_proposal_manually_reconciled" } });
     expect(ev.notes).toContain("Newest");
-    await expect(reconcileLegacyCurrentProposal(admin, caseId, ids[0], "again")).rejects.toThrow(/already has a current/);
+    await expect(reconcileLegacyCurrentProposal(admin, caseId, ids[0], "again")).rejects.toThrow(/does not need reconciliation/);
+  });
+});
+
+describe("reconcile with a set pointer", () => {
+  it("clears a pointer plus an off-pointer live proposal, which the list flags", async () => {
+    const c = await createCase(agent, { source: "email", customerName: "Mismatch Test", complaintText: "x" }, llm, { generate: async () => { throw new Error("skip"); } });
+    caseIds.push(c.id);
+    const a = await db.resolutionProposal.create({ data: { linkedCaseId: c.id, recommendation: "A", rationale: "r" } });
+    const b = await db.resolutionProposal.create({ data: { linkedCaseId: c.id, recommendation: "B", rationale: "r" } });
+    await db.humanApproval.create({ data: { linkedCaseId: c.id, approvalType: "resolution_proposal", linkedResolutionProposalId: b.id } });
+    await db.customerCase.update({ where: { id: c.id }, data: { currentResolutionProposalId: a.id } });
+    expect((await listCasesNeedingReconciliation()).map((r) => r.id)).toContain(c.id);
+    expect((await describeCurrent(db, c.id)).pointerMismatch).toBe(true);
+    await reconcileLegacyCurrentProposal(admin, c.id, b.id, "B is the right one");
+    expect(await pointer(c.id)).toBe(b.id);
+    expect((await db.resolutionProposal.findUniqueOrThrow({ where: { id: a.id } })).status).toBe("superseded");
+    expect((await listCasesNeedingReconciliation()).map((r) => r.id)).not.toContain(c.id);
   });
 });
 

@@ -5,7 +5,8 @@ import { ApprovalError } from "./review-approval";
 import { LIVE_STATUSES, lockCase, describeCurrent, supersedeProposal } from "./proposal-supersession";
 
 /**
- * Admin-only. For a legacy case with a NULL pointer and several live proposals, a human picks
+ * Admin-only. For a case with a NULL pointer and several live proposals (or a pointer plus an
+ * off-pointer live proposal), a human picks
  * the current one. The other live proposals are superseded per rule B.1 (recorded decisions
  * are never modified). Never called automatically, and never infers a choice.
  */
@@ -23,8 +24,11 @@ export async function reconcileLegacyCurrentProposal(
       await lockCase(tx, caseId);
       const state = await describeCurrent(tx, caseId);
       const c = await tx.customerCase.findUniqueOrThrow({ where: { id: caseId }, select: { currentResolutionProposalId: true } });
-      if (c.currentResolutionProposalId) throw new ApprovalError("This case already has a current proposal");
-      if (!state.needsReconciliation) throw new ApprovalError("This case does not need reconciliation");
+      // Two inconsistent states qualify: no pointer with several live proposals, or a pointer
+      // with a different live proposal beside it. A consistent case is refused.
+      if (!state.needsReconciliation && !(c.currentResolutionProposalId && state.pointerMismatch)) {
+        throw new ApprovalError("This case does not need reconciliation");
+      }
 
       const chosen = await tx.resolutionProposal.findUniqueOrThrow({ where: { id: resolutionProposalId } });
       if (chosen.linkedCaseId !== caseId) throw new ApprovalError("Proposal belongs to a different case");

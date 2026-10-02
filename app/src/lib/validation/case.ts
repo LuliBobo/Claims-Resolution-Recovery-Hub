@@ -33,7 +33,8 @@ export const caseUpdateInput = z.object({
   status: z.enum(STATUSES).optional(),
   caseType: z.enum(CASE_TYPES).optional(),
   priority: z.enum(PRIORITIES).optional(),
-  assignedReviewer: optionalText,
+  // undefined = leave unchanged; a blank string = clear the assignment.
+  assignedReviewer: z.string().trim().transform((v) => (v === "" ? null : v)).nullish(),
   recoveryNeeded: z.boolean().optional(),
 });
 

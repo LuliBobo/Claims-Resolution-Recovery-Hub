@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron-auth";
 import { db } from "@/server/db";
+import { getCarrierGateConfig } from "@/server/evidence/gate-config";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export async function GET(request: Request) {
     cronSecret: Boolean(process.env.CRON_SECRET),
     anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
     fakeLlmOff: process.env.E2E_FAKE_LLM !== "1",
+    // Informational: does not affect ok/degraded, since a fresh database has no reference data yet.
+    carrierGateActive: dbOk ? (await getCarrierGateConfig().catch(() => ({ active: false }))).active : false,
   };
   const ok = checks.database && checks.authSecret && checks.fakeLlmOff;
   const body = isAuthorizedCron(request) ? { status: ok ? "ok" : "degraded", checks } : { status: ok ? "ok" : "degraded", database: dbOk };

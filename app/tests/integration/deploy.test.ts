@@ -29,7 +29,9 @@ describe("/api/health", () => {
     process.env.ANTHROPIC_API_KEY = "sk-secret-value";
     const r = await health(req("Bearer cron-secret"));
     const text = await r.text();
-    expect(JSON.parse(text).checks).toEqual({ database: true, authSecret: true, cronSecret: true, anthropicKey: true, fakeLlmOff: true });
+    const checks = JSON.parse(text).checks;
+    expect(checks).toMatchObject({ database: true, authSecret: true, cronSecret: true, anthropicKey: true, fakeLlmOff: true });
+    expect(typeof checks.carrierGateActive).toBe("boolean");
     expect(text).not.toContain("sk-secret-value");
     expect(text).not.toContain("cron-secret");
   });

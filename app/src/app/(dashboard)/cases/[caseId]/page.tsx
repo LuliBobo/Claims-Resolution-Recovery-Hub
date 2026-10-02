@@ -107,6 +107,11 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         )}
       </section>
 
+      {!gate.applies && c.caseType === "damaged_delivery" && (
+        <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">
+          The carrier evidence gate does not apply to this case: the DPD Carrier Claims SOP is not linked to an active damaged_delivery rule. Missing evidence is not being checked. See Policy &amp; Rules.
+        </p>
+      )}
       {gate.applies && (
         <section className="flex flex-col gap-2">
           <h2 className="font-medium">Carrier claim evidence checklist</h2>
@@ -156,10 +161,12 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
 
       <section id="proposals" className="flex scroll-mt-56 flex-col gap-2">
         <h2 className="font-medium">Resolution proposals</h2>
-        {current.needsReconciliation && (
+        {(current.needsReconciliation || current.pointerMismatch) && (
           <div className="rounded-md border border-border bg-muted p-3 text-sm">
             <p className="mb-2 font-medium">
-              This case has {current.liveIds.length} live proposals and no current one. Sending is blocked until an admin reconciles it.
+              {current.pointerMismatch
+                ? `This case has ${current.liveIds.length} live proposals, and one of them is not the current one. An admin should reconcile it.`
+                : `This case has ${current.liveIds.length} live proposals and no current one. Sending is blocked until an admin reconciles it.`}
             </p>
             {actor?.role === "admin" ? (
               <ReconcileForm
