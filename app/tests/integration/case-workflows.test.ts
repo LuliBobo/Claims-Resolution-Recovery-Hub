@@ -70,6 +70,29 @@ describe("createCase", () => {
   });
 });
 
+describe("createCase LLM steps", () => {
+  it("starts summary and classification concurrently", async () => {
+    let started = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const enter = async () => {
+      started++;
+      if (started === 2) release();
+      await Promise.race([gate, new Promise((r) => setTimeout(r, 2000))]);
+    };
+    const llm: IntakeLlm = {
+      summarize: async () => (await enter(), { customerLanguage: "es", internalEnglishSummary: "s" }),
+      classify: async () => (await enter(), { caseType: "damaged_delivery", priority: "medium", confidence: 0.9 }),
+    };
+    const t0 = Date.now();
+    const c = await createCase(agent, complaint, llm, proposalOk);
+    createdCaseIds.push(c.id);
+    expect(started).toBe(2);
+    expect(Date.now() - t0).toBeLessThan(1800); // sequential execution would wait out the 2s timeout
+    expect(c.needsManualTriage).toBe(false);
+  });
+});
+
 describe("updateCase", () => {
   it("logs status changes as previous -> new and stamps resolvedAt", async () => {
     const c = await createCase(agent, complaint, okLlm, proposalOk);

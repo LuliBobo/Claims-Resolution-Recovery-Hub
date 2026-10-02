@@ -34,30 +34,39 @@ export async function createCase(
 
   let internalEnglishSummary: string | undefined;
   let detectedLanguage: string | undefined;
-  try {
-    const r = await llm.summarize(input.complaintText);
-    internalEnglishSummary = r.internalEnglishSummary;
-    detectedLanguage = r.customerLanguage.toLowerCase();
-  } catch (e) {
-    failures.push(`summary/translation failed: ${describe(e)}`);
-  }
-
   let caseType = input.caseType;
   let priority = input.priority;
   let classificationConfidence: number | undefined;
-  if (!caseType || !priority) {
-    try {
-      const r = await llm.classify(input.complaintText);
-      // Confidence describes the classifier's caseType, so store it only if it produced that value.
-      if (!caseType) classificationConfidence = r.confidence;
-      caseType ??= r.caseType;
-      priority ??= r.priority;
-    } catch (e) {
-      failures.push(`classification failed: ${describe(e)}`);
-    }
-  }
+  // The two LLM calls are independent, so they run concurrently: sequentially, retries could push
+  // intake past the serverless time limit.
+  await Promise.all([
+    llm.summarize(input.complaintText).then(
+      (r) => {
+        internalEnglishSummary = r.internalEnglishSummary;
+        detectedLanguage = r.customerLanguage.toLowerCase();
+      },
+      (e) => {
+        failures.push(`summary/translation failed: ${describe(e)}`);
+      },
+    ),
+    !caseType || !priority
+      ? llm.classify(input.complaintText).then(
+          (r) => {
+            // Confidence describes the classifier's caseType, so store it only if it produced that value.
+            if (!caseType) classificationConfidence = r.confidence;
+            caseType ??= r.caseType;
+            priority ??= r.priority;
+          },
+          (e) => {
+            failures.push(`classification failed: ${describe(e)}`);
+          },
+        )
+      : Promise.resolve(),
+  ]);
 
-  const needsManualTriage = failures.length > 0;
+  // The case is flagged until every step has finished, so a function killed mid-way (time limit,
+  // crash) leaves it visibly needing triage rather than silently incomplete.
+  let stepFailed = failures.length > 0;
 
   const created = await db.$transaction(async (tx) => {
     const created = await tx.customerCase.create({
@@ -74,7 +83,7 @@ export async function createCase(
         priority: priority ?? "medium",
         linkedOrderId: input.linkedOrderId,
         linkedShipmentId: input.linkedShipmentId,
-        needsManualTriage,
+        needsManualTriage: true,
         recoveryNeeded: input.recoveryNeeded,
         classificationConfidence,
       },
@@ -96,7 +105,7 @@ export async function createCase(
   try {
     await generateResolutionProposal(user.email, created.id, proposalDeps);
   } catch (e) {
-    await db.customerCase.update({ where: { id: created.id }, data: { needsManualTriage: true } });
+    stepFailed = true;
     await logAuditEvent({
       caseId: created.id,
       actor: "system",
@@ -108,7 +117,7 @@ export async function createCase(
     try {
       await generateRecoveryDraft(user.email, created.id, recoveryDeps);
     } catch (e) {
-      await db.customerCase.update({ where: { id: created.id }, data: { needsManualTriage: true } });
+      stepFailed = true;
       await logAuditEvent({
         caseId: created.id,
         actor: "system",
@@ -117,5 +126,6 @@ export async function createCase(
       });
     }
   }
+  if (!stepFailed) await db.customerCase.update({ where: { id: created.id }, data: { needsManualTriage: false } });
   return db.customerCase.findUniqueOrThrow({ where: { id: created.id } });
 }
