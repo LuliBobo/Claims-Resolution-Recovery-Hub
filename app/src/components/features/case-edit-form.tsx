@@ -5,11 +5,11 @@ import { updateCaseAction } from "@/actions/cases";
 import { Button } from "@/components/ui/button";
 import { CASE_TYPES, PRIORITIES, STATUSES } from "@/lib/validation/case";
 
-function Select({ name, label, options, value }: { name: string; label: string; options: readonly string[]; value: string }) {
+function Select({ name, label, options, value, disabled }: { name: string; label: string; options: readonly string[]; value: string; disabled?: boolean }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
       {label}
-      <select name={name} defaultValue={value} className="h-9 rounded-md border border-input bg-background px-2">
+      <select name={name} defaultValue={value} disabled={disabled} title={disabled ? "Reviewer or admin only" : undefined} className="h-9 rounded-md border border-input bg-background px-2">
         {options.map((o) => (
           <option key={o} value={o}>{o}</option>
         ))}
@@ -25,6 +25,7 @@ export function CaseEditForm({
   caseType,
   assignedReviewer,
   recoveryNeeded,
+  canClassify,
 }: {
   id: string;
   status: string;
@@ -32,13 +33,14 @@ export function CaseEditForm({
   caseType: string;
   assignedReviewer: string | null;
   recoveryNeeded: boolean;
+  canClassify: boolean;
 }) {
   const [error, action, pending] = useActionState(updateCaseAction.bind(null, id), undefined);
   return (
     <form action={action} className="grid gap-3 rounded-md border border-border p-4 sm:grid-cols-3">
       <Select name="status" label="Status" options={STATUSES} value={status} />
-      <Select name="priority" label="Priority" options={PRIORITIES} value={priority} />
-      <Select name="caseType" label="Case type" options={CASE_TYPES} value={caseType} />
+      <Select name="priority" label="Priority" options={PRIORITIES} value={priority} disabled={!canClassify} />
+      <Select name="caseType" label="Case type" options={CASE_TYPES} value={caseType} disabled={!canClassify} />
       <label className="flex flex-col gap-1 text-sm">
         Assigned reviewer
         <input name="assignedReviewer" defaultValue={assignedReviewer ?? ""} className="h-9 rounded-md border border-input bg-background px-3" />

@@ -79,6 +79,16 @@ describe("updateCase", () => {
     const ev = await db.auditEvent.findFirstOrThrow({ where: { linkedCaseId: c.id, action: "status_changed", newState: "resolved" } });
     expect([ev.previousState, ev.newState]).toEqual(["awaiting_approval", "resolved"]);
   });
+
+  it("lets only a reviewer or admin change case type or priority; agents may resubmit unchanged values", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    await expect(updateCase(agent, c.id, { caseType: "other" })).rejects.toBeInstanceOf(AuthError);
+    await expect(updateCase(agent, c.id, { priority: c.priority === "low" ? "high" : "low" })).rejects.toBeInstanceOf(AuthError);
+    await updateCase(agent, c.id, { caseType: c.caseType, priority: c.priority, status: "in_review" });
+    const reviewer: Actor = { id: "u2", email: "rev@test.io", name: "R", role: "reviewer" };
+    expect((await updateCase(reviewer, c.id, { caseType: "other" })).caseType).toBe("other");
+  });
 });
 
 describe("uploadAttachment", () => {

@@ -1,5 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
-import { ANY_ROLE, requireRole, type Actor } from "@/server/auth";
+import { ANY_ROLE, AuthError, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
 import { caseFilterInput, caseUpdateInput } from "@/lib/validation/case";
@@ -47,6 +47,14 @@ export async function updateCase(actor: Actor | null, id: string, raw: unknown) 
   const input = caseUpdateInput.parse(raw);
   return db.$transaction(async (tx) => {
     const before = await tx.customerCase.findUniqueOrThrow({ where: { id } });
+    // Case type and priority feed the evidence gate and the workflow score, so changing them is a reviewer/admin decision.
+    if (user.role === "agent") {
+      for (const field of ["caseType", "priority"] as const) {
+        if (input[field] !== undefined && input[field] !== before[field]) {
+          throw new AuthError("FORBIDDEN", `Only a reviewer or admin can change the case ${field === "caseType" ? "type" : "priority"}`);
+        }
+      }
+    }
     // Escalate route (score 11-15): closing the case needs a reviewer or admin, never an agent.
     if ((input.status === "resolved" || input.status === "closed") && before.status !== input.status && user.role === "agent") {
       const score = await getWorkflowScore(id, tx);

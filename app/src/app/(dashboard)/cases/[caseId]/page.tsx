@@ -71,6 +71,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           caseType={c.caseType}
           assignedReviewer={c.assignedReviewer}
           recoveryNeeded={c.recoveryNeeded}
+          canClassify={Boolean(actor && REVIEW_ROLES.includes(actor.role))}
         />
       </section>
 
