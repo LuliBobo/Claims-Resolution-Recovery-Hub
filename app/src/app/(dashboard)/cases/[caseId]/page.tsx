@@ -12,6 +12,9 @@ import { ReconcileForm } from "@/components/features/reconcile-form";
 import { approvalSummary, proposalLabel } from "@/lib/proposal-label";
 import { getActor } from "@/lib/session";
 import { describeCurrent } from "@/server/workflows/proposal-supersession";
+import { draftEvidenceRequestAction } from "@/actions/messages";
+import { MessageDraftCard } from "@/components/features/message-draft-card";
+import { getMissingEvidence } from "@/server/workflows/customer-message";
 import { RegenerateButton } from "@/components/features/regenerate-button";
 import { getCase } from "@/server/workflows/case-management";
 import { evaluateGateForCase } from "@/server/workflows/proposal-generation";
@@ -25,7 +28,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
   const sp = await props.searchParams;
   const c = await getCase(caseId).catch(() => null);
   if (!c) notFound();
-  const [gate, current, actor, score] = await Promise.all([evaluateGateForCase(c.id), describeCurrent(db, c.id), getActor(), getWorkflowScore(c.id)]);
+  const [gate, current, actor, score, missing] = await Promise.all([evaluateGateForCase(c.id), describeCurrent(db, c.id), getActor(), getWorkflowScore(c.id), getMissingEvidence(c.id)]);
   const uploadError = typeof sp.uploadError === "string" ? sp.uploadError : undefined;
 
   return (
@@ -113,6 +116,38 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           </p>
         </section>
       )}
+
+      <section className="flex flex-col gap-2">
+        <h2 className="font-medium">Customer evidence request</h2>
+        {missing.length > 0 ? (
+          <>
+            <p className="text-sm text-muted-foreground">Still needed from the customer (recomputed from current evidence):</p>
+            <ul className="list-disc pl-5 text-sm">
+              {missing.map((m) => (
+                <li key={m.text}>{m.text}</li>
+              ))}
+            </ul>
+            <ActionButton action={draftEvidenceRequestAction.bind(null, c.id)} label="Draft request to customer" pendingLabel="Drafting..." />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nothing is missing from the customer.</p>
+        )}
+        {c.messageDrafts
+          .filter((m) => m.status === "draft")
+          .map((m) => (
+            <MessageDraftCard key={m.id} id={m.id} caseId={c.id} body={m.body} language={m.language} items={m.missingItems as string[]} />
+          ))}
+        {c.messageDrafts
+          .filter((m) => m.status === "sent")
+          .map((m) => (
+            <details key={m.id} className="rounded-md border border-border p-3 text-sm">
+              <summary className="cursor-pointer">
+                Sent by {m.sentBy} on {m.sentAt?.toISOString().slice(0, 16).replace("T", " ")} UTC (manual attestation)
+              </summary>
+              <p className="mt-2 whitespace-pre-wrap">{m.body}</p>
+            </details>
+          ))}
+      </section>
 
       <section className="flex flex-col gap-2">
         <h2 className="font-medium">Resolution proposals</h2>

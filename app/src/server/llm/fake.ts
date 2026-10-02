@@ -25,6 +25,7 @@ export function fakeCall<T extends z.ZodType>(opts: CallJsonOptions<T>): z.infer
       legible: true, showsDamageOrCondition: true, subject: /carton|outer|box/i.test(fileName) ? "outer_carton" : "item", notes: "E2E photo",
     },
     record_label_observation: { legible: true, hasTrackingNumber: true, hasCarrier: true, hasAddress: true, hasShipDate: true, notes: "E2E label" },
+    record_evidence_request: { message: "E2E: Dear customer, please send the items listed below. Customer Support" },
     record_document_observation: { legible: true, relevantToCase: true, notes: "E2E document" },
   };
   if (!(opts.name in out)) throw new Error(`Fake LLM has no answer for ${opts.name}`);

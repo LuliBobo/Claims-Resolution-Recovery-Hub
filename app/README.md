@@ -67,5 +67,11 @@ deployment itself has not been run from here.
   is a recorded human decision of its own (`evidence_requested`, never `rejected`), makes the item
   non-live and non-sendable, and is replaced by the next regeneration. It does not change the case status
   and does not draft a message to the customer.
-- Not built from the original concept doc: PDF policy retrieval with excerpts, guided demo mode,
-  a generated customer message asking for missing evidence.
+- Customer evidence request: the case page lists what the customer still needs to provide, computed from
+  data and never by the AI (carrier-claim gate items, the stored reason each file was insufficient, the
+  rules' required evidence when nothing is attached, and the reviewer's "request more evidence" note while
+  it is current; an insufficient file stops counting once a sufficient one covers the same slot). "Draft
+  request to customer" has the AI word an email around exactly that list, in the customer's language. It is
+  a draft only: a person edits it, sends it themselves, and marks it sent (manual attestation); a newer draft
+  replaces the open one, and marking sent is refused once nothing is missing any more.
+- Not built from the original concept doc: PDF policy retrieval with excerpts and a guided demo mode.

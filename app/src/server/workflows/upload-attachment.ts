@@ -99,7 +99,7 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput, 
     return db.$transaction(async (tx) => {
       const updated = await tx.attachment.update({
         where: { id: created.id },
-        data: { evidenceStatus: a.status, aiNotes: a.notes, photoSubject: a.photoSubject },
+        data: { evidenceStatus: a.status, evidenceReason: a.reason, aiNotes: a.notes, photoSubject: a.photoSubject },
       });
       await logAuditEvent(
         { caseId: input.caseId, actor: "system", action: "evidence_judged", previousState: "pending_review", newState: a.status, notes: `${created.fileName}: ${a.reason}` },

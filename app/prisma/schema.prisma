@@ -265,10 +265,11 @@ model CustomerCase {
   currentResolutionProposal ResolutionProposal? @relation("CurrentProposal", fields: [currentResolutionProposalId], references: [id], onDelete: SetNull)
 
   attachments         Attachment[]
-  resolutionProposals ResolutionProposal[] @relation("CaseProposals")
+  resolutionProposals ResolutionProposal[]   @relation("CaseProposals")
   recoveryDrafts      RecoveryDraft[]
   auditEvents         AuditEvent[]
   humanApprovals      HumanApproval[]
+  messageDrafts       CustomerMessageDraft[]
 
   @@index([status])
   @@index([createdAt])
@@ -289,6 +290,8 @@ model Attachment {
   photoSubject        PhotoSubject?
   attachmentCategory  AttachmentCategory @default(other)
   aiNotes             String?
+  // Why the evidence judge found this insufficient (deterministic, from the sufficiency modules).
+  evidenceReason      String?
   // The single field every consumer reads to decide whether evidence is sufficient.
   evidenceStatus      EvidenceStatus     @default(pending_review)
   // Opaque storage reference (blob key / path).
@@ -429,4 +432,36 @@ model LoginAttempt {
   createdAt DateTime @default(now())
 
   @@index([email, createdAt])
+}
+
+enum MessageKind {
+  evidence_request
+}
+
+enum MessageStatus {
+  draft
+  sent
+  discarded
+}
+
+// A drafted message to the customer. Nothing is transmitted by the system: "sent" is a manual
+// attestation that a person sent it.
+model CustomerMessageDraft {
+  id           String        @id @default(uuid())
+  linkedCaseId String
+  kind         MessageKind
+  language     String
+  body         String
+  // What was missing when the draft was written (deterministic list the AI wrote around).
+  missingItems Json
+  status       MessageStatus @default(draft)
+  createdBy    String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sentAt       DateTime?
+  sentBy       String?
+
+  case CustomerCase @relation(fields: [linkedCaseId], references: [id], onDelete: Cascade)
+
+  @@index([linkedCaseId, createdAt])
 }

@@ -164,6 +164,23 @@ test("reviewer requests more evidence: the item leaves the queue, needs a commen
   await expect(agent.getByText('evidence requested by reviewer@example.com - "Please add a photo of the outer carton"')).toBeVisible();
   await expect(agent.getByRole("button", { name: /Mark as sent/ })).toHaveCount(0);
   await expect(agent.getByText("resolution_proposal_evidence_requested").first()).toBeVisible();
+
+  // The agent turns it into a customer email: what is missing comes from the data (gate list plus the
+  // reviewer's note), the AI only words it, the person edits it and attests that they sent it.
+  await expect(agent.getByText("Still needed from the customer")).toBeVisible();
+  await expect(agent.getByText("Shipping label photo (missing or not clear enough)").first()).toBeVisible();
+  await agent.getByRole("button", { name: "Draft request to customer" }).click();
+  const body = agent.locator('textarea[name="body"]');
+  await expect(body).toHaveValue(/E2E: Dear customer/);
+  await body.fill("Edited by the agent: please send a photo of the whole outer box.");
+  await agent.getByRole("button", { name: "Mark as sent (manual attestation)" }).click();
+  await expect(agent.locator('textarea[name="body"]')).toHaveCount(0); // the open draft is gone
+  await expect(agent.getByText(/Sent by agent@example.com on .* UTC \(manual attestation\)/)).toBeVisible();
+  await agent.getByText(/Sent by agent@example.com/).click();
+  await expect(agent.getByText("Edited by the agent: please send a photo of the whole outer box.")).toBeVisible(); // the edited text, not the AI's
+  for (const action of ["evidence_request_drafted", "evidence_request_edited", "evidence_request_sent"]) {
+    await expect(agent.getByText(action).first()).toBeVisible();
+  }
 });
 
 test("deployment safeguards: security headers, health check, and sign-in lockout", async ({ browser, request }) => {
