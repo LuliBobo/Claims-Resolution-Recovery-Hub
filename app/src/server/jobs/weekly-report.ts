@@ -26,6 +26,8 @@ export interface ReportData {
   drafts: { status: string; sentAt: Date | null; approvedAt: Date | null; estimatedRecoverableValue: number | null }[];
 }
 
+// Human decisions that carry a decision time (superseded and pending do not).
+const DECIDED = new Set(["approved", "rejected", "evidence_requested"]);
 const within = (d: Date | null, w: WeekWindow) => d !== null && d >= w.start && d < w.end;
 const day = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -41,8 +43,8 @@ export function buildWeeklyReport(data: ReportData, w: WeekWindow): string {
   const resolvedNoTime = data.cases.filter((c) => c.status === "resolved" && c.resolvedAt === null);
   const resolved = data.cases.filter((c) => within(c.resolvedAt, w));
   const proposals = data.proposals.filter((p) => within(p.createdAt, w));
-  const decided = data.approvals.filter((a) => (a.decision === "approved" || a.decision === "rejected") && within(a.decisionTime, w));
-  const decidedNoTime = data.approvals.filter((a) => (a.decision === "approved" || a.decision === "rejected") && a.decisionTime === null);
+  const decided = data.approvals.filter((a) => DECIDED.has(a.decision) && within(a.decisionTime, w));
+  const decidedNoTime = data.approvals.filter((a) => DECIDED.has(a.decision) && a.decisionTime === null);
   const sent = data.drafts.filter((d) => d.status === "sent" && within(d.sentAt, w));
   const sentNoTime = data.drafts.filter((d) => d.status === "sent" && d.sentAt === null);
   const sentValue = sent.reduce((sum, d) => sum + (d.estimatedRecoverableValue ?? 0), 0);
@@ -62,7 +64,7 @@ export function buildWeeklyReport(data: ReportData, w: WeekWindow): string {
     `- Cases opened: ${opened.length}`,
     `- Cases resolved: ${resolved.length}`,
     `- Resolution proposals generated: ${proposals.length}`,
-    `- Approvals decided: ${decided.length} (approved ${decided.filter((a) => a.decision === "approved").length}, rejected ${decided.filter((a) => a.decision === "rejected").length})`,
+    `- Approvals decided: ${decided.length} (approved ${decided.filter((a) => a.decision === "approved").length}, rejected ${decided.filter((a) => a.decision === "rejected").length}, evidence requested ${decided.filter((a) => a.decision === "evidence_requested").length})`,
     `- Recovery drafts sent: ${sent.length}, estimated value ${sentValue.toFixed(2)}`,
     "",
     "## Cases opened by type",

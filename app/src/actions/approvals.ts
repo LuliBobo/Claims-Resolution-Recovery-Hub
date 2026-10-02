@@ -5,7 +5,7 @@ import { getActor } from "@/lib/session";
 import { actionResolutionProposal } from "@/server/workflows/action-proposal";
 import { regenerateRecoveryDraft } from "@/server/workflows/recovery-draft";
 import { reconcileLegacyCurrentProposal } from "@/server/workflows/reconcile-proposal";
-import { reviewApproval } from "@/server/workflows/review-approval";
+import { approveWithEdits, reviewApproval } from "@/server/workflows/review-approval";
 import { sendRecoveryDraft } from "@/server/workflows/send-recovery-draft";
 
 // Thin wrappers. Each returns an error string for the UI, or undefined on success.
@@ -20,12 +20,27 @@ async function run(caseId: string | null, fn: () => Promise<unknown>) {
   if (caseId) revalidatePath(`/cases/${caseId}`);
 }
 
+const EDIT_FIELDS = ["recommendation", "rationale", "customerReplyDraft", "claimType", "draftText", "estimatedRecoverableValue"] as const;
+
 export async function reviewApprovalAction(approvalId: string, _p: string | undefined, fd: FormData) {
-  const decision = fd.get("decision");
-  if (decision !== "approved" && decision !== "rejected") return "Choose approve or reject";
-  return run(null, async () =>
-    reviewApproval(await getActor(), approvalId, decision, String(fd.get("comment") ?? "")),
-  );
+  const decision = String(fd.get("decision"));
+  const comment = String(fd.get("comment") ?? "");
+  if (decision === "approved" || decision === "rejected" || decision === "evidence_requested") {
+    return run(null, async () => reviewApproval(await getActor(), approvalId, decision, comment));
+  }
+  if (decision === "approved_with_edits") {
+    // The form always carries the current values; the workflow keeps only real differences.
+    const edits: Record<string, string | number> = {};
+    for (const f of EDIT_FIELDS) {
+      const raw = fd.get(`edit_${f}`);
+      if (raw === null) continue;
+      if (f === "estimatedRecoverableValue") {
+        if (String(raw).trim() !== "") edits[f] = Number(raw);
+      } else edits[f] = String(raw);
+    }
+    return run(null, async () => approveWithEdits(await getActor(), approvalId, edits, comment));
+  }
+  return "Choose a review action";
 }
 
 export async function markProposalSentAction(proposalId: string, caseId: string) {

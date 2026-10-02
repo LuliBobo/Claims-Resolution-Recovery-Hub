@@ -27,3 +27,29 @@ export function proposalLabel(p: LabelProposal, currentId: string | null): { bad
   if (p.id === currentId) return { badge: "Current", text: "Current proposal" };
   return { badge: null, text: "" };
 }
+
+export interface SummaryApproval {
+  decision: string;
+  reviewer: string | null;
+  reviewerComment: string | null;
+  edits: unknown;
+}
+
+/** One-line description of an approval for the case page, including edits and comments. */
+export function approvalSummary(approvals: SummaryApproval[]): string {
+  if (approvals.length === 0) return "none";
+  return approvals
+    .map((a) => {
+      const edited = a.edits && typeof a.edits === "object" ? Object.keys(a.edits as object) : [];
+      const decision = a.decision === "approved" && edited.length ? "approved with edits" : a.decision.replace("_", " ");
+      return [
+        decision,
+        a.reviewer ? `by ${a.reviewer}` : null,
+        edited.length ? `(edited: ${edited.join(", ")})` : null,
+        a.reviewerComment ? `- "${a.reviewerComment}"` : null,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    })
+    .join("; ");
+}

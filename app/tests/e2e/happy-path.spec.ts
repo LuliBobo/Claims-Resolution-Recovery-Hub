@@ -102,15 +102,21 @@ test("damaged delivery: from complaint to sent recovery claim", async ({ browser
 
   // 5. Agents cannot review. A reviewer sees exactly the two live approvals (superseded one excluded).
   await agent.goto("/approvals");
-  await expect(agent.getByRole("button", { name: "Approve" })).toHaveCount(0);
+  await expect(agent.getByRole("button", { name: "Approve", exact: true })).toHaveCount(0);
   const reviewer = await login(browser, "reviewer");
   await reviewer.goto("/approvals");
-  await expect(reviewer.getByRole("button", { name: "Approve" })).toHaveCount(2);
+  await expect(reviewer.getByRole("button", { name: "Approve", exact: true })).toHaveCount(2);
   await expect(reviewer.getByText("Request Missing Evidence")).toHaveCount(0);
-  for (let left = 2; left > 0; left--) {
-    await reviewer.getByRole("button", { name: "Approve" }).first().click();
-    await expect(reviewer.getByRole("button", { name: "Approve" })).toHaveCount(left - 1);
-  }
+
+  // The reviewer corrects the claim text while approving the recovery draft ("Approve with edits")...
+  const draftCard = reviewer.locator("div.rounded-md.border").filter({ hasText: "Transit damage" }).first();
+  await draftCard.getByText("Edit before approving").click();
+  await draftCard.locator('textarea[name="edit_draftText"]').fill("E2E claim text, corrected by reviewer.");
+  await draftCard.getByRole("button", { name: "Approve with edits" }).click();
+  await expect(reviewer.getByRole("button", { name: "Approve", exact: true })).toHaveCount(1);
+  // ...and plainly approves the proposal.
+  await reviewer.getByRole("button", { name: "Approve", exact: true }).click();
+  await expect(reviewer.getByRole("button", { name: "Approve", exact: true })).toHaveCount(0);
 
   // 6. Mark both as sent (manual attestation).
   await agent.goto(caseUrl);
@@ -122,8 +128,39 @@ test("damaged delivery: from complaint to sent recovery claim", async ({ browser
   await expect(sendButtons).toHaveCount(0);
   await expect(agent.getByText("(sent)")).toHaveCount(2);
 
+  // The edited text is what is stored, and the page says it was approved with edits.
+  await expect(agent.getByText("E2E claim text, corrected by reviewer.")).toBeVisible();
+  await expect(agent.getByText("approved with edits by reviewer@example.com (edited: draftText)")).toBeVisible();
+
   // 7. Audit trail shows the whole chain.
-  for (const action of ["case_created", "resolution_proposal_generated", "evidence_judged", "resolution_proposal_superseded", "resolution_proposal_approved", "recovery_draft_approved", "resolution_proposal_sent", "recovery_draft_sent"]) {
+  for (const action of ["case_created", "resolution_proposal_generated", "evidence_judged", "resolution_proposal_superseded", "resolution_proposal_approved", "recovery_draft_approved_with_edits", "resolution_proposal_sent", "recovery_draft_sent"]) {
     await expect(agent.getByText(action).first()).toBeVisible();
   }
+});
+
+test("reviewer requests more evidence: the item leaves the queue, needs a comment, and cannot be sent", async ({ browser }) => {
+  const agent = await login(browser, "agent");
+  await agent.goto("/cases/new");
+  await agent.locator('select[name="source"]').selectOption("email");
+  await agent.locator('input[name="customerName"]').fill("E2E Evidence Request");
+  await agent.locator('textarea[name="complaintText"]').fill("The vase arrived shattered.");
+  await agent.getByRole("button", { name: "Create case" }).click();
+  await expect(agent).toHaveURL(/\/cases\/[0-9a-f-]{36}$/);
+  const caseUrl = agent.url();
+
+  const reviewer = await login(browser, "reviewer");
+  await reviewer.goto("/approvals");
+  const card = reviewer.locator("div.rounded-md.border").filter({ hasText: "E2E Evidence Request" }).first();
+  await card.getByRole("button", { name: "Request more evidence" }).click();
+  await expect(card.getByText("comment is required")).toBeVisible(); // nothing changes without saying what is needed
+
+  await card.locator('input[name="comment"]').fill("Please add a photo of the outer carton");
+  await card.getByRole("button", { name: "Request more evidence" }).click();
+  await expect(reviewer.getByText("E2E Evidence Request")).toHaveCount(0);
+
+  await agent.goto(caseUrl);
+  await expect(agent.getByText("(evidence_requested)")).toBeVisible();
+  await expect(agent.getByText('evidence requested by reviewer@example.com - "Please add a photo of the outer carton"')).toBeVisible();
+  await expect(agent.getByRole("button", { name: /Mark as sent/ })).toHaveCount(0);
+  await expect(agent.getByText("resolution_proposal_evidence_requested").first()).toBeVisible();
 });

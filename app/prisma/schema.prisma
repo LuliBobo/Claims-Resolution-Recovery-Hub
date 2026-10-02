@@ -78,6 +78,8 @@ enum ApprovalDecision {
   approved
   rejected
   superseded
+  // A reviewer sent it back for more evidence. A recorded human decision, never a rejection.
+  evidence_requested
 }
 
 enum InsightTrend {
@@ -106,6 +108,7 @@ enum RecoveryDraftStatus {
   sent
   rejected
   resolved
+  evidence_requested
 }
 
 // `superseded` is new (not in Luo). Never conflated with `rejected`.
@@ -115,6 +118,7 @@ enum ProposalStatus {
   rejected
   sent
   superseded
+  evidence_requested
 }
 
 // What a photo_evidence attachment depicts, as observed by the evidence judge (never
@@ -370,6 +374,8 @@ model HumanApproval {
   reviewerComment            String?
   // Reserved for real human decisions only.
   decisionTime               DateTime?
+  // Set when approved with edits: { field: { from, to } }. The decision itself stays "approved".
+  edits                      Json?
   // Distinct from decisionTime: when the system superseded a still-pending approval.
   supersededAt               DateTime?
   createdAt                  DateTime         @default(now())

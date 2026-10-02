@@ -72,5 +72,13 @@ Open blockers before a real deployment:
   and the approvals queue. Derivations and thresholds are prototype assumptions (documented in
   `workflow-score.ts`). Reviewers/admins can override a factor with a reason (audited). The only
   enforcement: on the "escalate" route (11-15) an agent cannot move a case to resolved/closed.
-- Not built from the original concept doc: "approve with edits" / "request more evidence" decisions,
-  PDF policy retrieval with excerpts, guided demo mode.
+- Review actions (queue and case page): Approve, Approve with edits, Request more evidence, Reject.
+  *Approve with edits* keeps the decision `approved` (so every guard downstream is unchanged) and stores
+  `{field: {from, to}}` on the approval, so the original is never lost; only recommendation, rationale and
+  customer reply (proposals) or claim type, text and value (drafts) are editable, and a recommendation edit
+  is refused while the evidence gate applies and is incomplete. *Request more evidence* needs a comment,
+  is a recorded human decision of its own (`evidence_requested`, never `rejected`), makes the item
+  non-live and non-sendable, and is replaced by the next regeneration. It does not change the case status
+  and does not draft a message to the customer.
+- Not built from the original concept doc: PDF policy retrieval with excerpts, guided demo mode,
+  a generated customer message asking for missing evidence.

@@ -70,7 +70,7 @@ describe("buildWeeklyReport", () => {
     expect(md).toContain("Cases opened: 2");
     expect(md).toContain("Cases resolved: 1");
     expect(md).toContain("Resolution proposals generated: 1");
-    expect(md).toContain("Approvals decided: 1 (approved 1, rejected 0)");
+    expect(md).toContain("Approvals decided: 1 (approved 1, rejected 0, evidence requested 0)");
     expect(md).toContain("Recovery drafts sent: 1, estimated value 40.00");
   });
   it("labels records missing a timestamp as 'timestamp unavailable' rather than dropping them silently", () => {

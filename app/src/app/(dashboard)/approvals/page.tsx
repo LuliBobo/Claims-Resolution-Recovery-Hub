@@ -58,7 +58,16 @@ export default async function ApprovalsPage() {
               <p className="whitespace-pre-wrap">{a.recoveryDraft.draftText}</p>
             </div>
           )}
-          {canReview && <ReviewForm approvalId={a.id} />}
+          {canReview && (
+            <ReviewForm
+              approvalId={a.id}
+              original={
+                a.resolutionProposal
+                  ? { kind: "proposal", recommendation: a.resolutionProposal.recommendation, rationale: a.resolutionProposal.rationale, customerReplyDraft: a.resolutionProposal.customerReplyDraft }
+                  : { kind: "draft", claimType: a.recoveryDraft!.claimType, draftText: a.recoveryDraft!.draftText, estimatedRecoverableValue: a.recoveryDraft!.estimatedRecoverableValue?.toString() ?? null }
+              }
+            />
+          )}
         </div>
       ))}
     </div>

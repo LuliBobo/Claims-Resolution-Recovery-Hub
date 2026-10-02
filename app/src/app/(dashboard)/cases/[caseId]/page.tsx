@@ -9,7 +9,7 @@ import { ScoreOverrideForm } from "@/components/features/score-override-form";
 import { getWorkflowScore } from "@/server/scoring";
 import { REVIEW_ROLES } from "@/server/auth";
 import { ReconcileForm } from "@/components/features/reconcile-form";
-import { proposalLabel } from "@/lib/proposal-label";
+import { approvalSummary, proposalLabel } from "@/lib/proposal-label";
 import { getActor } from "@/lib/session";
 import { describeCurrent } from "@/server/workflows/proposal-supersession";
 import { RegenerateButton } from "@/components/features/regenerate-button";
@@ -147,7 +147,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
             <p>{p.rationale}</p>
             <p className="text-muted-foreground">
               Confidence {p.confidence != null ? Math.round(p.confidence * 100) + "%" : "n/a"}. Policy: {p.policySource ?? "none"}. Approval:{" "}
-              {p.approvals.map((a) => a.decision).join(", ") || "none"}
+              {approvalSummary(p.approvals)}
             </p>
             {p.status === "approved" && p.id === current.currentId && (
               <div className="mt-2">
@@ -177,7 +177,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
               {d.estimatedRecoverableValue != null && `, est. ${d.estimatedRecoverableValue.toString()}`}
             </div>
             <p className="whitespace-pre-wrap">{d.draftText}</p>
-            <p className="text-muted-foreground">Approval: {d.approvals.map((a) => a.decision).join(", ") || "none"}</p>
+            <p className="text-muted-foreground">Approval: {approvalSummary(d.approvals)}</p>
             {d.status === "approved" && (
               <div className="mt-2">
                 <ActionButton action={sendRecoveryDraftAction.bind(null, d.id, c.id)} label="Mark as sent (manual attestation)" />
