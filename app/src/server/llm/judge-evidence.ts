@@ -60,7 +60,7 @@ export async function observeAttachment(input: JudgeInput): Promise<AttachmentOb
   const context = `File name: ${input.fileName}\nComplaint summary: ${input.complaintSummary}`;
 
   if (input.category === "photo_evidence") {
-    if (input.contentType === "text/plain") throw new LlmError("photo_evidence must be an image");
+    if (!IMAGE_TYPES.has(input.contentType)) throw new LlmError("photo_evidence must be an image");
     const r = await callClaudeJson({ ...base, name: "record_photo_observation", user: `${PHOTO_INSTRUCTIONS}\n${context}`, schema: photoSchema });
     const { notes: n, ...observation } = r;
     return { kind: "photo", observation, notes: n };

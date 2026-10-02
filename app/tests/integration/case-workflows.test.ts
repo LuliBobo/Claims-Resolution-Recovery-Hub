@@ -112,6 +112,20 @@ describe("uploadAttachment", () => {
     ).rejects.toBeInstanceOf(UploadError);
     expect(await db.attachment.count({ where: { linkedCaseId: c.id } })).toBe(0);
   });
+
+  it("requires an image for photo evidence and an image or PDF for a shipping label", async () => {
+    const c = await createCase(agent, complaint, okLlm, proposalOk);
+    createdCaseIds.push(c.id);
+    const pdf = new TextEncoder().encode("%PDF-1.4 fake");
+    const text = new TextEncoder().encode("I swear there is a photo");
+    const up = (category: string, bytes: Uint8Array) =>
+      uploadAttachment(agent, { caseId: c.id, fileName: "f", declaredContentType: "image/png", category, bytes }, { observe: async () => { throw new Error("skip"); } });
+    await expect(up("photo_evidence", pdf)).rejects.toBeInstanceOf(UploadError);
+    await expect(up("photo_evidence", text)).rejects.toBeInstanceOf(UploadError);
+    await expect(up("shipping_label", text)).rejects.toBeInstanceOf(UploadError);
+    expect((await up("shipping_label", pdf)).sniffedContentType).toBe("application/pdf");
+    expect((await up("other", text)).sniffedContentType).toBe("text/plain");
+  });
 });
 
 describe("attachment byte storage", () => {

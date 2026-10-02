@@ -45,6 +45,14 @@ export async function uploadAttachment(actor: Actor | null, input: UploadInput, 
   if (!sniffed || !ALLOWED_UPLOAD_TYPES.has(sniffed)) {
     throw new UploadError("Unsupported file content (allowed: JPEG, PNG, GIF, WebP, PDF, plain text)");
   }
+  // The evidence gate counts photos and labels, so those categories must hold an actual image
+  // (a label may also be a PDF). Free text or a PDF cannot stand in for a photograph.
+  if (input.category === "photo_evidence" && !sniffed.startsWith("image/")) {
+    throw new UploadError("Photo evidence must be an image (JPEG, PNG, GIF or WebP)");
+  }
+  if (input.category === "shipping_label" && !sniffed.startsWith("image/") && sniffed !== "application/pdf") {
+    throw new UploadError("A shipping label must be an image or a PDF");
+  }
   const declared = input.declaredContentType.split(";")[0].trim().toLowerCase();
   const mismatch = declared !== sniffed;
 
