@@ -43,7 +43,10 @@ export default async function CasesPage(props: PageProps<"/cases">) {
           {parsed.map((c) => (
             <tr key={c.id} className="border-t border-border">
               <td className="py-1">{c.createdAt.toISOString().slice(0, 10)}</td>
-              <td><Link className="underline" href={`/cases/${c.id}`}>{c.customerName}</Link></td>
+              <td>
+                <Link className="underline" href={`/cases/${c.id}`}>{c.customerName}</Link>
+                {c.isDemo && <span className="ml-2 rounded border border-border px-1.5 py-0.5 text-xs text-muted-foreground">DEMO</span>}
+              </td>
               <td>{c.caseType}</td>
               <td>{c.priority}</td>
               <td>{c.status}</td>

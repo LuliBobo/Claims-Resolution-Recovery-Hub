@@ -83,4 +83,13 @@ deployment itself has not been run from here.
   rewrites history, and ids the AI invents are dropped. A proposal that cites nothing says so. Excerpts show on
   the case page and the approvals queue; the Policy & Rules page has a test search. Passages are whitespace-
   normalised contiguous text from the PDF; tables and multi-column layouts may extract in reading order only.
-- Not built from the original concept doc: a guided demo mode.
+- Guided demo (`DEMO_MODE=1`, off by default; `src/server/demo/`): a Guided demo page and a tour bar over the real pages
+  walk a ~4 minute story from the presentation script (Spanish broken-vase complaint becomes a replacement and a
+  carrier claim, with human approval and the audit trail, plus a second wrong-item scenario). An admin loads or
+  resets it; the data is built through the real workflows (evidence gate, supersession, approvals, audit) with
+  deterministic stand-in text, so it works with no AI key. It uses placeholder images, and one clearly labelled
+  shortcut (step 6) attaches the "customer's" outer-box photo with a stand-in judge and regenerates the proposal.
+  Demo records are flagged `isDemo`; reset deletes only those and refuses (changing nothing) if a real case
+  references one. Demo cases show in the normal lists and analytics, so do not enable it on a workspace with real
+  data. The score total for the flagship case stays at 6 across step 6: evidence completeness improves while
+  recovery potential rises, and the tour says so rather than claiming a drop.

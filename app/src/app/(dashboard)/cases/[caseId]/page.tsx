@@ -35,7 +35,10 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
   return (
     <div className="flex max-w-4xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold">{c.customerName}</h1>
+        <h1 className="text-xl font-semibold">
+          {c.customerName}
+          {c.isDemo && <span className="ml-2 rounded border border-border px-1.5 py-0.5 align-middle text-xs font-medium text-muted-foreground">DEMO</span>}
+        </h1>
         <p className="text-sm text-muted-foreground">
           {c.caseType}{c.classificationConfidence != null && ` (confidence ${Math.round(c.classificationConfidence * 100)}%)`} / {c.priority} / {c.status} / via {c.source} / language {c.customerLanguage}
         </p>
@@ -71,7 +74,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         />
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section id="evidence" className="flex scroll-mt-56 flex-col gap-2">
         <h2 className="font-medium">Workflow score</h2>
         <p className="text-sm">
           <span className="text-lg font-semibold">{score.total}/15</span>: {score.routeLabel}
@@ -150,7 +153,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
           ))}
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section id="proposals" className="flex scroll-mt-56 flex-col gap-2">
         <h2 className="font-medium">Resolution proposals</h2>
         {current.needsReconciliation && (
           <div className="rounded-md border border-border bg-muted p-3 text-sm">
@@ -205,7 +208,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         {c.resolutionProposals.length === 0 && <p className="text-sm text-muted-foreground">No proposals yet.</p>}
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section id="recovery" className="flex scroll-mt-56 flex-col gap-2">
         <h2 className="font-medium">Recovery drafts</h2>
         <ActionButton action={regenerateRecoveryDraftAction.bind(null, c.id)} label="Generate recovery draft" pendingLabel="Generating..." />
         {c.recoveryDrafts.map((d) => (
@@ -253,7 +256,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         </ul>
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section id="audit" className="flex scroll-mt-56 flex-col gap-2">
         <h2 className="font-medium">Audit trail</h2>
         <ul className="text-sm">
           {c.auditEvents.map((e) => (

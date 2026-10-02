@@ -2,7 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActor } from "@/lib/session";
 import { logoutAction } from "@/actions/auth";
+import { Suspense } from "react";
 import { PrototypeBanner } from "@/components/features/prototype-banner";
+import { TourBar } from "@/components/features/tour-bar";
+import { isDemoEnabled } from "@/server/demo/config";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
@@ -14,6 +17,7 @@ const NAV = [
   { href: "/shipments", label: "Shipments" },
   { href: "/operations-summary", label: "Operations Summary" },
 ];
+const DEMO_NAV = { href: "/demo", label: "Guided demo" };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const actor = await getActor();
@@ -22,7 +26,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex min-h-screen">
       <aside className="flex w-56 flex-col gap-1 border-r border-border p-4">
         <div className="mb-4 text-sm font-semibold">Claims Hub</div>
-        {NAV.map((n) => (
+        {(isDemoEnabled() ? [...NAV, DEMO_NAV] : NAV).map((n) => (
           <Link key={n.href} href={n.href} className="rounded-md px-2 py-1.5 text-sm hover:bg-accent">
             {n.label}
           </Link>
@@ -35,7 +39,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
       <div className="flex-1">
-        <PrototypeBanner />
+        <PrototypeBanner demo={isDemoEnabled()} />
+        {isDemoEnabled() && (
+          <Suspense>
+            <TourBar />
+          </Suspense>
+        )}
         <main className="p-6">{children}</main>
       </div>
     </div>

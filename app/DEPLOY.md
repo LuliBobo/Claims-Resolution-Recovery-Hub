@@ -34,6 +34,7 @@ memory of Vercel's documented behaviour and worth a quick check against the curr
 | `ANTHROPIC_API_KEY` | your key |
 | `ANTHROPIC_MODEL` | optional, defaults to `claude-sonnet-5-5` |
 | `MAX_UPLOAD_MB` | optional, default `4` (see limits) |
+| `DEMO_MODE` | `1` only for a dedicated demo workspace (see below); leave unset in production |
 
 Do **not** set `E2E_FAKE_LLM`, `SEED_*` or `NEW_USER_PASSWORD` on Vercel. `AUTH_URL` / `AUTH_TRUST_HOST`
 are not needed on Vercel. For Preview deployments either give them their own database or leave
@@ -94,6 +95,13 @@ in the browser:
    curl -s -H "Authorization: Bearer $CRON_SECRET" $BASE/api/cron/recompute-insights
    curl -s -H "Authorization: Bearer $CRON_SECRET" $BASE/api/cron/weekly-report
    ```
+
+## Optional: a demo workspace
+
+Set `DEMO_MODE=1` on a *separate* project/database to present the product. Sign in as an admin, open
+*Guided demo* and press *Load demo data*; *Reset* restores the starting state between runs. Demo records are
+flagged and reset only deletes those, but demo cases appear in the normal case lists and analytics, so do not
+turn this on where real cases live. The demo needs no `ANTHROPIC_API_KEY`.
 
 ## 6. Things to know
 

@@ -10,7 +10,7 @@ import { buildTextPdf } from "@/lib/pdf-build";
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg==", "base64");
 const PASSWORD = "changeme-dev";
 
-async function login(browser: Browser, who: "agent" | "reviewer"): Promise<Page> {
+async function login(browser: Browser, who: "agent" | "reviewer" | "admin"): Promise<Page> {
   const page = await (await browser.newContext()).newPage();
   await page.goto("/login");
   await page.getByPlaceholder("Email").fill(`${who}@example.com`);
@@ -273,4 +273,88 @@ test("policy PDFs: upload, search, and a proposal that cites the verbatim excerp
   const card = reviewer.locator("div.rounded-md.border").filter({ hasText: "E2E Policy Cite" }).first();
   await card.getByText("Policy excerpts (1)").click();
   await expect(card.locator("blockquote")).toContainText("outer carton photo");
+});
+
+test("guided demo: load, walk the steps on real pages, use the shortcut, approve, reset", async ({ browser }) => {
+  const admin = await login(browser, "admin");
+  await admin.goto("/demo");
+  await expect(admin.getByRole("heading", { name: "Guided demo" })).toBeVisible();
+  await expect(admin.getByText("Load the demo data to see the steps.")).toBeVisible();
+  await expect(admin.getByText("Demo mode: sample data, AI steps are pre-generated.")).toBeVisible();
+
+  // Loading builds both scenarios through the real workflows (a few seconds).
+  await admin.getByRole("button", { name: "Load demo data" }).click();
+  await expect(admin.getByRole("link", { name: "4. Evidence checker" })).toBeVisible({ timeout: 45_000 });
+  await expect(admin.getByRole("link", { name: "Open the wrong-item case" })).toBeVisible();
+
+  // Step 4 on the real case page: the tour bar guides, the page shows the live state.
+  await admin.getByRole("link", { name: "4. Evidence checker" }).click();
+  await expect(admin).toHaveURL(/\/cases\/[0-9a-f-]{36}\?demo=4#evidence/);
+  const bar = admin.getByRole("region", { name: "Guided demo" });
+  await expect(bar.getByText("Demo step 4 of 12: Evidence checker")).toBeVisible();
+  await expect(admin.getByText("[ ] Outer carton photo")).toBeVisible();
+  await expect(admin.getByText("[x] Shipping label photo")).toBeVisible();
+  await expect(admin.getByText("[x] Damaged item photo")).toBeVisible();
+  await expect(admin.getByText("DEMO", { exact: true })).toBeVisible();
+  await expect(admin.locator('textarea[name="body"]')).toHaveValue(/Hola Lucía/);
+  await expect(admin.getByText("6/15")).toBeVisible();
+
+  // Step 5: policy excerpts, verbatim, with document, version and page.
+  await bar.getByRole("link", { name: /Next: Policy support/ }).click();
+  await expect(bar.getByText("Demo step 5 of 12: Policy support")).toBeVisible();
+  await admin.getByText(/Policy excerpts \(\d+\)/).first().click();
+  await expect(admin.locator("blockquote").first()).toBeVisible();
+
+  // Step 6: the shortcut. The gate clears, the proposal becomes a replacement, the old one is superseded.
+  await bar.getByRole("link", { name: /Next: Resolution recommendation/ }).click();
+  await expect(bar.getByText("Demo step 6 of 12: Resolution recommendation")).toBeVisible();
+  await bar.getByRole("button", { name: "Demo shortcut: customer sends the outer-box photo" }).click();
+  await expect(admin.getByText("[x] Outer carton photo")).toBeVisible({ timeout: 20_000 });
+  await expect(admin.getByText("Superseded", { exact: true })).toBeVisible();
+  await expect(admin.getByText("Current", { exact: true })).toBeVisible();
+  await admin.getByText(/Customer reply draft \(es\)/).last().click(); // the current proposal is the later card
+  await expect(admin.getByText("Gracias por la foto de la caja.")).toBeVisible();
+
+  // Step 8: the English carrier claim.
+  await bar.getByRole("link", { name: /Next: Customer reply draft/ }).click();
+  await bar.getByRole("link", { name: /Next: Recovery draft/ }).click();
+  await expect(admin.getByText("Transit damage to DPD (carrier)")).toBeVisible();
+  await expect(admin.getByText(/To: DPD Customer Claims/)).toBeVisible();
+
+  // Step 9: human review. Approve the vase proposal and recovery draft; nothing is sent by the system.
+  await bar.getByRole("link", { name: /Next: Human review/ }).click();
+  await expect(admin).toHaveURL(/\/approvals\?demo=9/);
+  const vaseCards = admin.locator("div.rounded-md.border.p-4").filter({ hasText: "Lucía Fernández" });
+  await expect(vaseCards).toHaveCount(2);
+  for (let left = 2; left > 0; left--) {
+    await vaseCards.first().getByRole("button", { name: "Approve", exact: true }).click();
+    await expect(vaseCards).toHaveCount(left - 1);
+  }
+
+  // Step 10 and 11: the audit trail and the repeated-issue pattern.
+  await admin.goto("/demo");
+  await expect(admin.getByText("| done").first()).toBeVisible(); // step 6 and 9 report done
+  await admin.getByRole("link", { name: "10. Audit timeline" }).click();
+  for (const action of ["case_created", "evidence_judged", "resolution_proposal_superseded", "resolution_proposal_approved", "recovery_draft_approved"]) {
+    await expect(admin.getByText(action).first()).toBeVisible();
+  }
+  await admin.goto("/insights?demo=11");
+  const row = admin.locator("tr").filter({ hasText: "DEMO-VASE-01" });
+  await expect(row).toContainText("DPD");
+  await expect(row).toContainText("up");
+  await expect(admin.getByRole("region", { name: "Guided demo" }).getByText("Demo step 11 of 12: Analytics")).toBeVisible();
+
+  // The shortcut cannot be repeated, and reset returns to the known starting state.
+  await admin.goto("/demo");
+  await admin.getByRole("button", { name: "Reset demo to its starting state" }).click();
+  await expect(admin.getByText("to do").first()).toBeVisible({ timeout: 45_000 });
+  await admin.getByRole("link", { name: "4. Evidence checker" }).click();
+  await expect(admin.getByText("[ ] Outer carton photo")).toBeVisible();
+
+  // Non-admins can read the steps but not load or reset; the tour API needs a session.
+  const reviewer = await login(browser, "reviewer");
+  await reviewer.goto("/demo");
+  await expect(reviewer.getByText("Only an admin can load or reset the demo data.")).toBeVisible();
+  await expect(reviewer.getByRole("button", { name: /Load demo data|Reset demo/ })).toHaveCount(0);
+  expect((await (await browser.newContext()).request.get("/api/demo/tour")).status()).toBe(401);
 });

@@ -24,6 +24,7 @@ export default defineConfig({
     env: {
       DATABASE_URL: E2E_DB_URL,
       E2E_FAKE_LLM: "1",
+      DEMO_MODE: "1",
       AUTH_SECRET: "e2e-only-secret",
       AUTH_TRUST_HOST: "true",
     },

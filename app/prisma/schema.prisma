@@ -172,6 +172,8 @@ model Order {
   quantity      Int
   orderValue    Decimal  @db.Decimal(12, 2)
   supplier      String?
+  // Created by demo mode; the only records demo reset may delete.
+  isDemo        Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -185,6 +187,8 @@ model Shipment {
   carrier        String
   trackingNumber String
   warehouse      String?
+  // Created by demo mode; the only records demo reset may delete.
+  isDemo         Boolean                @default(false)
   shipDate       DateTime?
   deliveryDate   DateTime?
   deliveryStatus ShipmentDeliveryStatus @default(pending)
@@ -255,6 +259,8 @@ model CustomerCase {
   resolvedAt                  DateTime?
   // Set when LLM translate/classify failed at intake; case still created, needs manual triage.
   needsManualTriage           Boolean      @default(false)
+  // Created by demo mode; the only records demo reset may delete.
+  isDemo                      Boolean      @default(false)
   // 0..1, as reported by the classifier; null when classification was manual or failed.
   classificationConfidence    Float?
   // Operator overrides of workflow score factors: { factorKey: { score, reason, by, at } }.
