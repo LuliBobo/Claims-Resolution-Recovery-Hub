@@ -93,6 +93,19 @@ describe("createCase LLM steps", () => {
   });
 });
 
+describe("createCase LLM failures", () => {
+  it("survives a synchronous throw from an LLM dependency and flags the case", async () => {
+    const llm: IntakeLlm = {
+      summarize: (() => { throw new Error("sync boom"); }) as IntakeLlm["summarize"],
+      classify: okLlm.classify,
+    };
+    const c = await createCase(agent, complaint, llm, proposalOk);
+    createdCaseIds.push(c.id);
+    expect(c.needsManualTriage).toBe(true);
+    expect(await db.auditEvent.count({ where: { linkedCaseId: c.id, action: "llm_step_failed" } })).toBeGreaterThan(0);
+  });
+});
+
 describe("updateCase", () => {
   it("logs status changes as previous -> new and stamps resolvedAt", async () => {
     const c = await createCase(agent, complaint, okLlm, proposalOk);

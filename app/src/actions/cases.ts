@@ -24,7 +24,7 @@ export async function updateCaseAction(id: string, _p: string | undefined, fd: F
       status: raw.status || undefined,
       priority: raw.priority || undefined,
       caseType: raw.caseType || undefined,
-      assignedReviewer: raw.assignedReviewer,
+      assignedReviewer: typeof raw.assignedReviewer === "string" ? raw.assignedReviewer : undefined,
       recoveryNeeded: raw.recoveryNeeded === "on",
     });
   } catch (e) {

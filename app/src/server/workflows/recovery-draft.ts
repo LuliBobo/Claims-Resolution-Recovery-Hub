@@ -14,8 +14,8 @@ export interface RecoveryDeps {
 }
 const defaultDeps: RecoveryDeps = { generate: generateRecoveryDraftText };
 
-/** Drafts that are still live: not yet rejected, sent or resolved. */
-const OPEN_DRAFT_STATUSES: RecoveryDraftStatus[] = ["draft", "pending_approval", "evidence_requested", "approved"];
+/** Drafts that are still live. `evidence_requested` is not: a reviewer decided it, and regeneration replaces it. */
+const OPEN_DRAFT_STATUSES: RecoveryDraftStatus[] = ["draft", "pending_approval", "approved"];
 
 export class RecoveryError extends Error {
   constructor(message: string) {

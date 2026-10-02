@@ -188,6 +188,14 @@ describe("recovery drafts", () => {
     expect(await db.recoveryDraft.count({ where: { linkedCaseId: c.id, status: "pending_approval" } })).toBe(1);
   });
 
+  it("a draft on which more evidence was requested does not block regeneration", async () => {
+    const c = await newCase();
+    const first = await db.recoveryDraft.findFirstOrThrow({ where: { linkedCaseId: c.id } });
+    await db.recoveryDraft.update({ where: { id: first.id }, data: { status: "evidence_requested" } });
+    await regenerateRecoveryDraft(agent, c.id, recoveryDeps);
+    expect(await db.recoveryDraft.count({ where: { linkedCaseId: c.id } })).toBe(2);
+  });
+
   it("regenerating a proposal adds its own pending approval without touching the recovery approval", async () => {
     const c = await newCase();
     await regenerateResolutionProposal(agent, c.id, proposalDeps);

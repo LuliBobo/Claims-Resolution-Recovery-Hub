@@ -22,10 +22,12 @@ export async function GET(request: Request) {
     cronSecret: Boolean(process.env.CRON_SECRET),
     anthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
     fakeLlmOff: process.env.E2E_FAKE_LLM !== "1",
-    // Informational: does not affect ok/degraded, since a fresh database has no reference data yet.
-    carrierGateActive: dbOk ? (await getCarrierGateConfig().catch(() => ({ active: false }))).active : false,
   };
   const ok = checks.database && checks.authSecret && checks.fakeLlmOff;
-  const body = isAuthorizedCron(request) ? { status: ok ? "ok" : "degraded", checks } : { status: ok ? "ok" : "degraded", database: dbOk };
+  // Informational and only computed for authorized callers (it queries the database): it does not
+  // affect ok/degraded, since a fresh database has no reference data yet.
+  const authorized = isAuthorizedCron(request);
+  const carrierGateActive = authorized && dbOk ? (await getCarrierGateConfig().catch(() => ({ active: false }))).active : false;
+  const body = authorized ? { status: ok ? "ok" : "degraded", checks: { ...checks, carrierGateActive } } : { status: ok ? "ok" : "degraded", database: dbOk };
   return NextResponse.json(body, { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
 }

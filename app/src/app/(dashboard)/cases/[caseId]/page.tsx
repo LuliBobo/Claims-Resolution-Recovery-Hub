@@ -44,7 +44,7 @@ export default async function CaseDetailPage(props: PageProps<"/cases/[caseId]">
         </p>
         {c.needsManualTriage && (
           <p className="mt-2 rounded-md border border-border bg-muted p-2 text-sm">
-            The AI triage step failed for this case. Check type, priority and summary manually.
+            This case is flagged for manual triage: an AI step failed or did not finish. Check the audit trail, then verify type, priority and summary manually.
           </p>
         )}
       </div>

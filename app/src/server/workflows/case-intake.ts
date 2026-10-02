@@ -40,7 +40,7 @@ export async function createCase(
   // The two LLM calls are independent, so they run concurrently: sequentially, retries could push
   // intake past the serverless time limit.
   await Promise.all([
-    llm.summarize(input.complaintText).then(
+    (async () => llm.summarize(input.complaintText))().then(
       (r) => {
         internalEnglishSummary = r.internalEnglishSummary;
         detectedLanguage = r.customerLanguage.toLowerCase();
@@ -50,7 +50,7 @@ export async function createCase(
       },
     ),
     !caseType || !priority
-      ? llm.classify(input.complaintText).then(
+      ? (async () => llm.classify(input.complaintText))().then(
           (r) => {
             // Confidence describes the classifier's caseType, so store it only if it produced that value.
             if (!caseType) classificationConfidence = r.confidence;
