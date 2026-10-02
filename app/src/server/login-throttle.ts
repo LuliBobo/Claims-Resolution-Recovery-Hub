@@ -22,3 +22,23 @@ export async function recordLoginAttempt(email: string, success: boolean, now = 
   // Opportunistic cleanup keeps the table small without a scheduled job.
   await db.loginAttempt.deleteMany({ where: { createdAt: { lt: new Date(now.getTime() - RETENTION_MS) } } });
 }
+
+/**
+ * Reserve-then-verify: the attempt is recorded as a failure BEFORE the (slow) password check, and the
+ * window is counted including this attempt. Parallel guesses therefore see each other, so at most
+ * MAX_FAILURES of them are ever evaluated. Returns null when throttled. Call `finishLoginAttempt`
+ * with the outcome; an attempt that never finishes (crash) stays counted as a failure.
+ */
+export async function beginLoginAttempt(email: string, now = new Date()): Promise<{ id: string } | null> {
+  const row = await db.loginAttempt.create({ data: { email, success: false, createdAt: now } });
+  const failures = await db.loginAttempt.count({
+    where: { email, success: false, createdAt: { gt: new Date(now.getTime() - WINDOW_MS) } },
+  });
+  if (failures > MAX_FAILURES) return null;
+  return { id: row.id };
+}
+
+export async function finishLoginAttempt(attempt: { id: string }, success: boolean, now = new Date()) {
+  if (success) await db.loginAttempt.update({ where: { id: attempt.id }, data: { success: true } });
+  await db.loginAttempt.deleteMany({ where: { createdAt: { lt: new Date(now.getTime() - RETENTION_MS) } } });
+}
