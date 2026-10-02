@@ -6,7 +6,7 @@ import type { AttachmentObservation } from "@/server/evidence/assess";
 import type { IntakeLlm } from "@/server/workflows/case-intake";
 import { createCase } from "@/server/workflows/case-intake";
 import { actionResolutionProposal } from "@/server/workflows/action-proposal";
-import { correctRecoveryDraftValue, RecoveryError } from "@/server/workflows/recovery-draft";
+import { correctRecoveryDraftValue, RecoveryError, regenerateRecoveryDraft } from "@/server/workflows/recovery-draft";
 import { regenerateResolutionProposal } from "@/server/workflows/regenerate-proposal";
 import { ApprovalError, listPendingApprovals, reviewApproval } from "@/server/workflows/review-approval";
 import { sendRecoveryDraft } from "@/server/workflows/send-recovery-draft";
@@ -176,6 +176,16 @@ describe("recovery drafts", () => {
     expect(d.estimatedRecoverableValue?.toString()).toBe("55");
     const ev = await db.auditEvent.findFirstOrThrow({ where: { linkedCaseId: c.id, action: "recovery_draft_value_corrected" } });
     expect([ev.previousState, ev.newState]).toEqual(["40", "55"]);
+  });
+
+  it("refuses a second open recovery draft, including under parallel calls, but allows one after a rejection", async () => {
+    const c = await newCase();
+    await expect(regenerateRecoveryDraft(agent, c.id, recoveryDeps)).rejects.toBeInstanceOf(RecoveryError);
+    const first = await db.recoveryDraft.findFirstOrThrow({ where: { linkedCaseId: c.id } });
+    await db.recoveryDraft.update({ where: { id: first.id }, data: { status: "rejected" } });
+    const results = await Promise.allSettled([regenerateRecoveryDraft(agent, c.id, recoveryDeps), regenerateRecoveryDraft(agent, c.id, recoveryDeps)]);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    expect(await db.recoveryDraft.count({ where: { linkedCaseId: c.id, status: "pending_approval" } })).toBe(1);
   });
 
   it("regenerating a proposal adds its own pending approval without touching the recovery approval", async () => {

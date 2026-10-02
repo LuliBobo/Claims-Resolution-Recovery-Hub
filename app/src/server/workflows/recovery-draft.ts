@@ -1,6 +1,8 @@
+import type { RecoveryDraftStatus } from "@/generated/prisma/client";
 import { ANY_ROLE, requireRole, type Actor } from "@/server/auth";
 import { db } from "@/server/db";
 import { logAuditEvent } from "@/server/audit";
+import { lockCase } from "@/server/workflows/proposal-supersession";
 import {
   generateRecoveryDraftText,
   type GeneratedRecoveryDraft,
@@ -11,6 +13,9 @@ export interface RecoveryDeps {
   generate: (ctx: RecoveryContext) => Promise<GeneratedRecoveryDraft>;
 }
 const defaultDeps: RecoveryDeps = { generate: generateRecoveryDraftText };
+
+/** Drafts that are still live: not yet rejected, sent or resolved. */
+const OPEN_DRAFT_STATUSES: RecoveryDraftStatus[] = ["draft", "pending_approval", "evidence_requested", "approved"];
 
 export class RecoveryError extends Error {
   constructor(message: string) {
@@ -71,6 +76,13 @@ export async function generateRecoveryDraft(
   });
 
   return db.$transaction(async (tx) => {
+    // Serialise with other generators for this case, then refuse a second open claim: two live drafts
+    // could both be approved and sent, claiming the same loss twice.
+    await lockCase(tx, caseId);
+    const open = await tx.recoveryDraft.count({ where: { linkedCaseId: caseId, status: { in: OPEN_DRAFT_STATUSES } } });
+    if (open > 0) {
+      throw new RecoveryError("This case already has an open recovery draft; review it (approve, reject or send) before generating another");
+    }
     const draft = await tx.recoveryDraft.create({
       data: {
         linkedCaseId: caseId,
