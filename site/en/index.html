@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claims Resolution &amp; Recovery Hub – one complaint in, two controlled outcomes out</title>
+<meta name="description" content="A working tool for small online shops: turns one complaint into a reply to the customer and a draft claim to the carrier. A person approves every step.">
+<meta property="og:title" content="Claims Resolution &amp; Recovery Hub – one complaint in, two controlled outcomes out">
+<meta property="og:description" content="A working tool for small online shops: turns one complaint into a reply to the customer and a draft claim to the carrier. A person approves every step.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b5d52'/%3E%3Cpath d='M18 33l9 9 19-21' fill='none' stroke='white' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+<a class="brand" href="">Claims Resolution &amp; Recovery Hub</a>
+<nav aria-label="Navigation"><a class="hide-sm" href="#how">How it works</a><a class="hide-sm" href="#limits">What it does and does not do</a><a class="hide-sm" href="#status">Project status</a><a class="lang" href="../" hreflang="sk" lang="sk">SK</a></nav>
+</div></header>
+<main>
+<div class="hero"><div class="wrap">
+<p class="eyebrow">For small online shops</p>
+<h1>One complaint in, two controlled outcomes out.</h1>
+<p class="lead">A customer writes that their vase arrived broken. Claims Resolution &amp; Recovery Hub prepares a reply in the customer&#x27;s language and a draft claim to the carrier. You review and approve both.</p>
+<div class="cta"><a class="btn" href="#how">See how it works</a><a class="btn ghost" href="#status">Project status</a></div>
+<figure class="hero-shot"><img src="../assets/img/case-overview.png" alt="Case detail in the app: a Spanish complaint, an internal English summary and the workflow score" width="1280" height="860"><figcaption>Example from the demo mode. The data is invented and the AI answers are pre-recorded.</figcaption></figure>
+</div></div>
+<section><div class="wrap">
+<h2>A complaint usually breaks into five small jobs</h2>
+<p class="intro">In a small team one person handles them between inboxes and spreadsheets: read the message, find the order and shipment, check the photos, find the rule, write to the customer and then separately write to the carrier. The last step is easy to lose. The carrier claim is never filed because one photo was missing or the deadline passed, and the loss stays with you.</p>
+<ol class="flow"><li><strong>Reads</strong><span>the message and detects the language</span></li><li><strong>Checks</strong><span>whether the evidence is complete</span></li><li><strong>Finds</strong><span>the rule in your own documents</span></li><li><strong>Proposes</strong><span>a resolution and a carrier claim</span></li><li><strong>Waits</strong><span>for your approval</span></li></ol>
+</div></section>
+<section id="how"><div class="wrap">
+<h2>How it works on one case</h2>
+<p class="intro">Example case: a Spanish customer reports a broken glass vase. All screenshots come from the demo mode.</p>
+<div class="step"><div class="text"><p class="num">1. Understanding the case</p><h3>The message is read and classified</h3><p>The system detects the language, writes an internal English summary, sets the case type and links the order and shipment.</p><p>You can correct the summary and the type. Only reviewers can change the type and priority, because the evidence check depends on them.</p></div><div class="stack"><figure><img src="../assets/img/case-overview.png" alt="Case detail: a Spanish message and its internal English summary" loading="lazy" width="1280" height="860"><figcaption>Case detail: a Spanish message and its internal English summary</figcaption></figure></div></div><div class="step flip"><div class="text"><p class="num">2. Evidence check</p><h3>A missing photo is found before the claim is filed</h3><p>For a damaged parcel the carrier requires three things: the shipping label, the damaged item and the outer carton. The checklist is recomputed from the current attachments on every view.</p><p>The AI only describes what is in an attachment. Whether the evidence is sufficient is decided by a fixed rule, not by the model&#x27;s impression. A request for the missing photo is drafted in the customer&#x27;s language. You send it yourself.</p></div><div class="stack"><figure><img class="crop" src="../assets/img/evidence-missing.png" alt="Evidence checklist: the outer carton photo is missing" loading="lazy" width="896" height="132"><figcaption>Evidence checklist: the outer carton photo is missing</figcaption></figure><figure><img class="crop" src="../assets/img/evidence-request.png" alt="Drafted request to the customer for the missing photo" loading="lazy" width="896" height="456"><figcaption>Drafted request to the customer for the missing photo</figcaption></figure></div></div><div class="step"><div class="text"><p class="num">3. Backed by your rules</p><h3>The recommendation shows where it comes from</h3><p>The system searches your PDF documents for relevant passages and stores them verbatim, with the document name, version and page. That makes the recommendation checkable.</p><p>While a photo is missing, the proposal is &quot;Request Missing Evidence&quot;. Once it arrives a new proposal is created and the old one stays in the history as superseded.</p></div><div class="stack"><figure><img class="crop" src="../assets/img/proposals.png" alt="Resolution proposals with policy excerpts; the old proposal is marked superseded" loading="lazy" width="896" height="616"><figcaption>Resolution proposals with policy excerpts; the old proposal is marked superseded</figcaption></figure></div></div><div class="step flip"><div class="text"><p class="num">4. Workflow score</p><h3>Who should see the case, and how fast</h3><p>Five factors from 0 to 3 (evidence completeness, policy clarity, customer impact, business exposure, recovery potential) give a total score and a suggested path, from a quick review to escalation with no automatic closure.</p><p>The score is recomputed from current data. A reviewer can override it, but must give a reason, and the override is audited. The thresholds are prototype working assumptions, not a legal standard.</p></div><div class="stack"><figure><img class="crop" src="../assets/img/score-after.png" alt="Workflow score with an explanation for each factor" loading="lazy" width="896" height="365"><figcaption>Workflow score with an explanation for each factor</figcaption></figure></div></div><div class="step"><div class="text"><p class="num">5. Claim to the carrier</p><h3>The same complaint produces a second outcome</h3><p>The system drafts the claim: who it is addressed to, which shipment it concerns, the reason and an estimate of the recoverable amount.</p><p>Damaged and missing items are claimed from the carrier, other cases from the supplier. Only one open claim draft can exist per case, so the same loss is not claimed twice.</p></div><div class="stack"><figure><img class="crop" src="../assets/img/recovery.png" alt="Draft claim to the carrier with an estimated recoverable amount" loading="lazy" width="896" height="298"><figcaption>Draft claim to the carrier with an estimated recoverable amount</figcaption></figure></div></div><div class="step flip"><div class="text"><p class="num">6. Approval and history</p><h3>A person decides, everything is recorded</h3><p>A reviewer can approve, approve with edits, request more evidence or reject. Edits are stored as the original and the new value.</p><p>The system sends nothing. You confirm sending manually, and every step is written to a history that cannot be changed afterwards.</p></div><div class="stack"><figure><img src="../assets/img/approvals.png" alt="Approval queue with Approve, Approve with edits, Request more evidence and Reject" loading="lazy" width="1280" height="860"><figcaption>Approval queue with Approve, Approve with edits, Request more evidence and Reject</figcaption></figure><figure><img class="crop" src="../assets/img/audit.png" alt="Case audit trail" loading="lazy" width="896" height="509"><figcaption>Case audit trail</figcaption></figure></div></div>
+</div></section>
+<section id="limits"><div class="wrap">
+<h2>What the tool does and does not do</h2>
+<div class="cols">
+<div class="card"><h3>It does</h3><ul><li>Prepares the groundwork: summary, list of missing evidence, proposed resolution, text for the customer and a draft claim.</li><li>Shows which of your documents a recommendation is based on.</li><li>Records approvals, edits and reasons in a history that cannot be changed.</li><li>Helps you recover money from carriers by checking evidence in time.</li></ul></div>
+<div class="card no"><h3>It does not</h3><ul><li>Send emails, claims or refunds. A person always sends them.</li><li>Decide whether evidence is sufficient on the model&#x27;s judgement.</li><li>Give legal advice. The score and its thresholds are working assumptions.</li><li>Read scanned PDFs without a text layer (there is no OCR).</li><li>Replace a helpdesk. It is an add-on for complaints and recovery.</li></ul></div>
+</div>
+</div></section>
+<section id="status"><div class="wrap">
+<h2>Project status</h2>
+<div class="notice"><h3>A prototype looking for its first pilot</h3><p>The application is a working prototype. It is covered by automated tests (unit, integration against a real database and end-to-end in a browser).</p><p>The screenshots on this page come from the demo mode with invented data. The attachments are generated placeholder images and the policies are sample texts.</p><p>We have not yet run the AI steps against a live model. In the demo mode and in the tests they are replaced by prepared answers, so we make no claims yet about output quality on your real complaints.</p><p>We have not tried a production deployment yet; it is prepared and awaiting verification.</p></div>
+</div></section>
+<section><div class="wrap">
+<h2>Interested in a pilot?</h2>
+<p class="intro">We are looking for small online shops that deal with carrier complaints and would like to try the tool on their own cases.</p>
+<a class="btn" href="mailto:__CONTACT_EMAIL__?subject=Pilot%20for%20Claims%20Resolution%20%26%20Recovery%20Hub">Send an email</a>
+</div></section>
+</main>
+<footer><div class="wrap">Claims Resolution &amp; Recovery Hub. Prototype. Screenshots contain invented data.</div></footer>
+</body>
+</html>
